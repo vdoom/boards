@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boards with Open Firmware</title>
+<meta name="description" content="Small boards for makers, each with open-source firmware, desktop software and documentation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* The catalogue of all products. Same paper, soldermask and ENIG tokens as the
+   product pages (ins10-a3/index.html), so moving between them feels like one site.
+   To add a product: copy one <article class="card"> and point it at the product's
+   folder next to this file. */
+:root {
+  --paper: #f4f7f3;
+  --panel: #ffffff;
+  --ink: #15211b;
+  --muted: #566359;
+  --line: #d3ddd5;
+  --mask: #1d5a39;
+  --mask-ink: #ffffff;
+  --gold: #8a6416;
+  --gold-fill: #e2b84a;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.86rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-3: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
+  --wrap: 72rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #101814; --panel: #16211b; --ink: #e4ece6; --muted: #9aaba0; --line: #283730;
+    --mask: #e2b84a; --mask-ink: #1a1405; --gold: #e8c262; --gold-fill: #e2b84a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #101814; --panel: #16211b; --ink: #e4ece6; --muted: #9aaba0; --line: #283730;
+  --mask: #e2b84a; --mask-ink: #1a1405; --gold: #e8c262; --gold-fill: #e2b84a;
+  color-scheme: dark;
+}
+:root[data-lang="uk"] .en { display: none !important; }
+:root:not([data-lang="uk"]) .uk { display: none !important; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.6; }
+a { color: var(--gold); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 2px; border-radius: 4px; }
+h1, h2 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+img { max-width: 100%; height: auto; display: block; }
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 1rem; padding-block: 0.6rem; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.04em; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; margin-right: auto; }
+.brand .pad { width: 0.9rem; height: 0.9rem; border-radius: 50%; border: 0.22rem solid var(--gold-fill); background: var(--paper); }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.lang button { font: 500 var(--step--1) var(--font-mono); padding: 0.25rem 0.6rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+.intro { padding-block: 3rem 2rem; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
+.intro h1 { font-size: var(--step-3); font-weight: 700; margin-top: 0.6rem; max-width: 22ch; }
+.intro p.lead { margin-top: 1rem; max-width: 62ch; color: var(--muted); font-size: var(--step-1); }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 1.25rem; padding-bottom: 3rem; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+.card .shot { display: block; background: #0f1a14; aspect-ratio: 16 / 10; max-width: 100%; }
+.card .shot img { width: 100%; height: 100%; object-fit: contain; padding: 0.75rem; }
+.card .body { padding: 1.1rem 1.2rem 1.25rem; display: flex; flex-direction: column; gap: 0.7rem; flex: 1; min-width: 0; }
+.card h2 { font-size: 1.35rem; font-weight: 700; }
+.card h2 a { color: var(--ink); text-decoration: none; }
+.card h2 a:hover { text-decoration: underline; }
+.card .what { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; padding: 0; margin: 0; }
+.chips li { font-family: var(--font-mono); font-size: 0.78rem; border: 1px solid var(--line); border-radius: 4px; padding: 0.1rem 0.45rem; color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; margin-top: auto; padding-top: 0.4rem; font-weight: 500; }
+.links .buy { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.02em; background: var(--mask); color: var(--mask-ink); border-radius: 6px; padding: 0.35rem 0.8rem; text-decoration: none; }
+
+footer { border-top: 1px solid var(--line); padding-block: 1.5rem 2rem; color: var(--muted); font-size: var(--step--1); }
+footer .wrap { display: grid; gap: 0.35rem; }
+.selectable { user-select: all; font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><span class="pad" aria-hidden="true"></span><span class="en">Boards</span><span class="uk">Плати</span></a>
+    <div class="lang" role="group" aria-label="Language / Мова">
+      <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-set-lang="uk" aria-pressed="false">УКР</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="intro">
+    <div class="wrap">
+      <p class="eyebrow"><span class="en">Boards · open firmware · documentation</span><span class="uk">Плати · відкрита прошивка · документація</span></p>
+      <h1><span class="en">Small boards that come with the software to use them</span><span class="uk">Невеликі плати разом із програмами, щоб ними користуватися</span></h1>
+      <p class="lead"><span class="en">Each board is sold on its own. The firmware, desktop tools and guides are free downloads with source code, so you can adapt them to your project.</span><span class="uk">Кожна плата продається окремо. Прошивка, програми для ПК і посібники — безкоштовні, разом із сирцями, тож їх можна підлаштувати під свій проєкт.</span></p>
+    </div>
+  </section>
+
+  <section aria-label="Products">
+    <div class="wrap cards">
+      <article class="card">
+        <a class="shot" href="ins10-a3/" aria-hidden="true" tabindex="-1"><img src="ins10-a3/img/module.webp" alt="" width="1200" height="816" loading="lazy"></a>
+        <div class="body">
+          <h2><a href="ins10-a3/">INS10-A3</a></h2>
+          <p class="what"><span class="en">10-DoF orientation sensor for Raspberry Pi Pico: Kalman-filter firmware, the INS10 Studio calibration app and a printable calibration jig.</span><span class="uk">Датчик орієнтації 10-DoF для Raspberry Pi Pico: прошивка з фільтром Калмана, додаток калібрування INS10 Studio і підставка під 3D-друк.</span></p>
+          <ul class="chips">
+            <li>ICM-42688-P</li><li>MMC5983MA</li><li>LPS22DF</li><li>SPI · 3.3 V</li>
+          </ul>
+          <p class="links">
+            <a href="ins10-a3/"><span class="en">Product page</span><span class="uk">Сторінка товару</span></a>
+            <a href="https://github.com/vdoom/boards/tree/main/ins10-a3"><span class="en">Docs and source</span><span class="uk">Документація й сирці</span></a>
+            <a class="buy" href="{{SHOP_URL}}"><span class="en">Buy</span><span class="uk">Купити</span></a>
+          </p>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><span class="en">Manufacturer:</span><span class="uk">Виробник:</span> {{SELLER_NAME}}, {{SELLER_ADDRESS}}</p>
+    <p><span class="en">Questions:</span><span class="uk">Питання:</span> <span class="selectable">{{SUPPORT_EMAIL}}</span></p>
+    <p><span class="en">Source code and documentation:</span><span class="uk">Сирці й документація:</span> <a href="https://github.com/vdoom/boards">https://github.com/vdoom/boards</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function setLang(lang) {
+    root.setAttribute("data-lang", lang);
+    root.setAttribute("lang", lang);
+    document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-set-lang") === lang));
+    });
+    try { localStorage.setItem("site-lang", lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("site-lang"); } catch (e) {}
+  var nav = (navigator.language || "").toLowerCase();
+  setLang(saved || (nav.indexOf("uk") === 0 ? "uk" : "en"));
+  document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-set-lang")); });
+  });
+})();
+</script>
+</body>
+</html>

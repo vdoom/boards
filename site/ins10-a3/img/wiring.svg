@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" width="960" height="720" font-family="Arial, Helvetica, sans-serif">
+<rect width="960" height="720" fill="#ffffff"/>
+<text x="24" y="38" font-size="24" font-weight="bold" fill="#222">INS10-A3 to Raspberry Pi Pico / Pico 2</text>
+<text x="24" y="64" font-size="15" fill="#555">Eight wires, same colour = same wire. Pico numbers are physical pin numbers. Not to scale.</text>
+<rect x="40" y="100" width="248" height="145" rx="10" fill="#1f5a35" stroke="#0d2a18" stroke-width="2"/>
+<text x="164" y="158" font-size="17" fill="#fff" text-anchor="middle" font-weight="bold">INS10-A3</text>
+<text x="164" y="178" font-size="11" fill="#cfe8d8" text-anchor="middle">components up</text>
+<circle cx="66.0" cy="231.4" r="11" fill="#c81e1e" stroke="#fff" stroke-width="2"/>
+<text x="66.0" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">1</text>
+<circle cx="93.9" cy="231.4" r="11" fill="#1e1e1e" stroke="#fff" stroke-width="2"/>
+<text x="93.9" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">2</text>
+<circle cx="121.8" cy="231.4" r="11" fill="#783caa" stroke="#fff" stroke-width="2"/>
+<text x="121.8" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">3</text>
+<circle cx="149.8" cy="231.4" r="11" fill="#0078c8" stroke="#fff" stroke-width="2"/>
+<text x="149.8" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">4</text>
+<circle cx="177.7" cy="231.4" r="11" fill="#00968c" stroke="#fff" stroke-width="2"/>
+<text x="177.7" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">5</text>
+<circle cx="205.7" cy="231.4" r="11" fill="#e68200" stroke="#fff" stroke-width="2"/>
+<text x="205.7" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">6</text>
+<circle cx="233.6" cy="231.4" r="11" fill="#3c9628" stroke="#fff" stroke-width="2"/>
+<text x="233.6" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">7</text>
+<circle cx="261.5" cy="231.4" r="11" fill="#aa6e28" stroke="#fff" stroke-width="2"/>
+<text x="261.5" y="236.4" font-size="12" text-anchor="middle" fill="#fff" font-weight="bold">8</text>
+<circle cx="66.0" cy="113.8" r="7" fill="#8d8d8d" stroke="#fff" stroke-width="1.5"/>
+<circle cx="177.7" cy="113.8" r="7" fill="#8d8d8d" stroke="#fff" stroke-width="1.5"/>
+<circle cx="261.5" cy="113.8" r="7" fill="#8d8d8d" stroke="#fff" stroke-width="1.5"/>
+<text x="40" y="267" font-size="12" fill="#666">J1 pins 1-8. The three top pads (INT) are not needed.</text>
+<text x="370" y="104" font-size="15" font-weight="bold" fill="#222">INS10-A3 J1</text>
+<text x="520" y="104" font-size="15" font-weight="bold" fill="#222">Pico pin</text>
+<text x="630" y="104" font-size="15" font-weight="bold" fill="#222">Pico signal</text>
+<rect x="370" y="115" width="26" height="16" rx="3" fill="#c81e1e"/>
+<text x="383" y="128" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">1</text>
+<text x="404" y="128" font-size="14" fill="#222">3V3</text>
+<text x="520" y="128" font-size="14" fill="#222">36</text>
+<text x="630" y="128" font-size="14" fill="#222">3V3(OUT)</text>
+<rect x="370" y="137" width="26" height="16" rx="3" fill="#1e1e1e"/>
+<text x="383" y="150" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">2</text>
+<text x="404" y="150" font-size="14" fill="#222">GND</text>
+<text x="520" y="150" font-size="14" fill="#222">23</text>
+<text x="630" y="150" font-size="14" fill="#222">GND</text>
+<rect x="370" y="159" width="26" height="16" rx="3" fill="#783caa"/>
+<text x="383" y="172" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
+<text x="404" y="172" font-size="14" fill="#222">MMC_CS</text>
+<text x="520" y="172" font-size="14" fill="#222">14</text>
+<text x="630" y="172" font-size="14" fill="#222">GP10</text>
+<rect x="370" y="181" width="26" height="16" rx="3" fill="#0078c8"/>
+<text x="383" y="194" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">4</text>
+<text x="404" y="194" font-size="14" fill="#222">ICM_CS</text>
+<text x="520" y="194" font-size="14" fill="#222">22</text>
+<text x="630" y="194" font-size="14" fill="#222">GP17</text>
+<rect x="370" y="203" width="26" height="16" rx="3" fill="#00968c"/>
+<text x="383" y="216" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">5</text>
+<text x="404" y="216" font-size="14" fill="#222">LPS_CS</text>
+<text x="520" y="216" font-size="14" fill="#222">15</text>
+<text x="630" y="216" font-size="14" fill="#222">GP11</text>
+<rect x="370" y="225" width="26" height="16" rx="3" fill="#e68200"/>
+<text x="383" y="238" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">6</text>
+<text x="404" y="238" font-size="14" fill="#222">SCLK</text>
+<text x="520" y="238" font-size="14" fill="#222">24</text>
+<text x="630" y="238" font-size="14" fill="#222">GP18</text>
+<rect x="370" y="247" width="26" height="16" rx="3" fill="#3c9628"/>
+<text x="383" y="260" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">7</text>
+<text x="404" y="260" font-size="14" fill="#222">MOSI</text>
+<text x="520" y="260" font-size="14" fill="#222">25</text>
+<text x="630" y="260" font-size="14" fill="#222">GP19</text>
+<rect x="370" y="269" width="26" height="16" rx="3" fill="#aa6e28"/>
+<text x="383" y="282" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">8</text>
+<text x="404" y="282" font-size="14" fill="#222">MISO</text>
+<text x="520" y="282" font-size="14" fill="#222">21</text>
+<text x="630" y="282" font-size="14" fill="#222">GP16</text>
+<rect x="225" y="410" width="510" height="210" rx="10" fill="#2e7d32" stroke="#1b4d1f" stroke-width="2"/>
+<rect x="205" y="491.0" width="36" height="48" rx="4" fill="#c8c8c8" stroke="#777"/>
+<text x="251" y="520.0" font-size="13" fill="#e8f5e9">USB</text>
+<rect x="425" y="480" width="70" height="70" fill="#222"/>
+<text x="555" y="521.0" font-size="17" fill="#fff" font-weight="bold">Raspberry Pi Pico</text>
+<text x="555" y="541.0" font-size="12" fill="#e8f5e9">component side</text>
+<circle cx="238.7" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="238.7" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">1</text>
+<circle cx="264.1" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="264.1" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">2</text>
+<circle cx="289.5" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="289.5" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">3</text>
+<circle cx="314.9" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="314.9" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">4</text>
+<circle cx="340.3" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="340.3" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">5</text>
+<circle cx="365.7" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="365.7" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">6</text>
+<circle cx="391.1" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="391.1" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">7</text>
+<circle cx="416.5" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="416.5" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">8</text>
+<circle cx="441.9" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="441.9" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">9</text>
+<circle cx="467.3" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="467.3" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">10</text>
+<circle cx="492.7" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="492.7" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">11</text>
+<circle cx="518.1" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="518.1" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">12</text>
+<circle cx="543.5" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="543.5" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">13</text>
+<circle cx="568.9" cy="604.0" r="10" fill="#783caa" stroke="#fff" stroke-width="2"/>
+<text x="568.9" y="608.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">3</text>
+<text x="573.9" y="630.0" font-size="13" fill="#783caa" font-weight="bold" text-anchor="end" transform="rotate(-90 573.9 630.0)">14 · GP10</text>
+<circle cx="594.3" cy="604.0" r="10" fill="#00968c" stroke="#fff" stroke-width="2"/>
+<text x="594.3" y="608.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">5</text>
+<text x="599.3" y="630.0" font-size="13" fill="#00968c" font-weight="bold" text-anchor="end" transform="rotate(-90 599.3 630.0)">15 · GP11</text>
+<circle cx="619.7" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="619.7" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">16</text>
+<circle cx="645.1" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="645.1" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">17</text>
+<circle cx="670.5" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="670.5" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">18</text>
+<circle cx="695.9" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="695.9" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">19</text>
+<circle cx="721.3" cy="604.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="721.3" y="589.0" font-size="9" text-anchor="middle" fill="#cfe8d0">20</text>
+<circle cx="721.3" cy="426.0" r="10" fill="#aa6e28" stroke="#fff" stroke-width="2"/>
+<text x="721.3" y="430.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">8</text>
+<text x="726.3" y="400.0" font-size="13" fill="#aa6e28" font-weight="bold" transform="rotate(-90 726.3 400.0)">21 · GP16</text>
+<circle cx="695.9" cy="426.0" r="10" fill="#0078c8" stroke="#fff" stroke-width="2"/>
+<text x="695.9" y="430.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">4</text>
+<text x="700.9" y="400.0" font-size="13" fill="#0078c8" font-weight="bold" transform="rotate(-90 700.9 400.0)">22 · GP17</text>
+<circle cx="670.5" cy="426.0" r="10" fill="#1e1e1e" stroke="#fff" stroke-width="2"/>
+<text x="670.5" y="430.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">2</text>
+<text x="675.5" y="400.0" font-size="13" fill="#1e1e1e" font-weight="bold" transform="rotate(-90 675.5 400.0)">23 · GND</text>
+<circle cx="645.1" cy="426.0" r="10" fill="#e68200" stroke="#fff" stroke-width="2"/>
+<text x="645.1" y="430.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">6</text>
+<text x="650.1" y="400.0" font-size="13" fill="#e68200" font-weight="bold" transform="rotate(-90 650.1 400.0)">24 · GP18</text>
+<circle cx="619.7" cy="426.0" r="10" fill="#3c9628" stroke="#fff" stroke-width="2"/>
+<text x="619.7" y="430.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">7</text>
+<text x="624.7" y="400.0" font-size="13" fill="#3c9628" font-weight="bold" transform="rotate(-90 624.7 400.0)">25 · GP19</text>
+<circle cx="594.3" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="594.3" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">26</text>
+<circle cx="568.9" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="568.9" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">27</text>
+<circle cx="543.5" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="543.5" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">28</text>
+<circle cx="518.1" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="518.1" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">29</text>
+<circle cx="492.7" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="492.7" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">30</text>
+<circle cx="467.3" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="467.3" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">31</text>
+<circle cx="441.9" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="441.9" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">32</text>
+<circle cx="416.5" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="416.5" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">33</text>
+<circle cx="391.1" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="391.1" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">34</text>
+<circle cx="365.7" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="365.7" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">35</text>
+<circle cx="340.3" cy="426.0" r="10" fill="#c81e1e" stroke="#fff" stroke-width="2"/>
+<text x="340.3" y="430.0" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">1</text>
+<text x="345.3" y="400.0" font-size="13" fill="#c81e1e" font-weight="bold" transform="rotate(-90 345.3 400.0)">36 · 3V3(OUT)</text>
+<circle cx="314.9" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="314.9" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">37</text>
+<circle cx="289.5" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="289.5" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">38</text>
+<circle cx="264.1" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="264.1" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">39</text>
+<circle cx="238.7" cy="426.0" r="6" fill="#d7dbdd" stroke="#556" stroke-width="1"/>
+<text x="238.7" y="450.0" font-size="9" text-anchor="middle" fill="#cfe8d0">40</text>
+<text x="755" y="431" font-size="12" fill="#666">pins 40 … 21</text>
+<text x="755" y="609" font-size="12" fill="#666">pins 1 … 20</text>
+</svg>

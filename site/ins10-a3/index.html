@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>INS10-A3 Orientation Sensor</title>
+<meta name="description" content="INS10-A3: 10-DoF orientation sensor module for Raspberry Pi Pico with open-source Kalman-filter firmware, the INS10 Studio calibration app and a printable calibration jig.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a printed-circuit datasheet. One column of sections on a faintly green paper,
+   soldermask green and ENIG gold as the only accents; X/Y/Z axis colours appear only
+   where axes are shown. */
+:root {
+  --paper: #f4f7f3;
+  --panel: #ffffff;
+  --ink: #15211b;
+  --muted: #566359;
+  --line: #d3ddd5;
+  --mask: #1d5a39;
+  --mask-ink: #ffffff;
+  --gold: #8a6416;
+  --gold-fill: #e2b84a;
+  --code-bg: #e9efe9;
+  --ax-x: #cf3a2c;
+  --ax-y: #2f8a3e;
+  --ax-z: #2f61c8;
+  --board: #1f5a37;
+  --board-edge: #133a23;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.86rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.6rem;
+  --step-3: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
+  --wrap: 72rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #101814; --panel: #16211b; --ink: #e4ece6; --muted: #9aaba0; --line: #283730;
+    --mask: #e2b84a; --mask-ink: #1a1405; --gold: #e8c262; --gold-fill: #e2b84a; --code-bg: #1b2822;
+    --ax-x: #ff7466; --ax-y: #6fd17e; --ax-z: #7ea3ff; --board: #24663f; --board-edge: #0e2b1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #101814; --panel: #16211b; --ink: #e4ece6; --muted: #9aaba0; --line: #283730;
+  --mask: #e2b84a; --mask-ink: #1a1405; --gold: #e8c262; --gold-fill: #e2b84a; --code-bg: #1b2822;
+  --ax-x: #ff7466; --ax-y: #6fd17e; --ax-z: #7ea3ff; --board: #24663f; --board-edge: #0e2b1a;
+  color-scheme: dark;
+}
+:root[data-lang="uk"] .en { display: none !important; }
+:root:not([data-lang="uk"]) .uk { display: none !important; }
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+a { color: var(--gold); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--step-2); font-weight: 600; }
+h3 { font-size: var(--step-1); font-weight: 600; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+img { max-width: 100%; height: auto; display: block; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Header */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 1rem; padding-block: 0.6rem; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.04em; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+.brand .pad { width: 0.9rem; height: 0.9rem; border-radius: 50%; border: 0.22rem solid var(--gold-fill); background: var(--paper); }
+.nav { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-left: auto; font-size: var(--step--1); }
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--ink); }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.lang button { font: 500 var(--step--1) var(--font-mono); padding: 0.25rem 0.6rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-display); font-weight: 600; letter-spacing: 0.02em;
+  padding: 0.7rem 1.2rem; border-radius: 6px; text-decoration: none;
+  background: var(--mask); color: var(--mask-ink); border: 1px solid var(--mask);
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.small { padding: 0.4rem 0.8rem; font-size: var(--step--1); }
+
+/* Hero */
+.hero { padding-block: 3rem 2rem; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
+.hero h1 { font-size: var(--step-3); font-weight: 700; margin-top: 0.6rem; }
+.hero .lede { margin-top: 1rem; font-size: var(--step-1); color: var(--muted); max-width: 36rem; }
+.hero .cta { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.6rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.6rem; padding: 0; list-style: none; }
+.chips li { font-family: var(--font-mono); font-size: var(--step--1); border: 1px solid var(--line); border-radius: 4px; padding: 0.15rem 0.5rem; color: var(--muted); }
+.hero figure { margin: 0; }
+.hero figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 0.4rem; text-align: right; }
+
+/* Live stream panel */
+.live { margin-top: 1.4rem; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 1rem; display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 1rem; align-items: center; }
+.stage { height: 8rem; perspective: 600px; display: grid; place-items: center; }
+.tilt { transform: rotateX(52deg); transform-style: preserve-3d; }
+.board3d {
+  width: 7.2rem; height: 4.2rem; border-radius: 0.4rem; position: relative;
+  background: var(--board); box-shadow: 0 0 0 2px var(--board-edge), 0 14px 18px -10px rgba(0, 0, 0, 0.45);
+  transform-style: preserve-3d; transition: transform 0.1s linear;
+}
+.board3d .chip { position: absolute; background: #222; border-radius: 2px; }
+.board3d .pads { position: absolute; left: 0.5rem; right: 0.5rem; bottom: 0.25rem; display: flex; justify-content: space-between; }
+.board3d .pads i { width: 0.5rem; height: 0.5rem; border-radius: 50%; border: 2px solid var(--gold-fill); }
+.axis { position: absolute; left: 50%; top: 50%; height: 2px; transform-origin: 0 50%; }
+.axis.x { width: 3.6rem; background: var(--ax-x); }
+.axis.y { width: 2.6rem; background: var(--ax-y); transform: rotate(-90deg); }
+.readout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.readout div { font-family: var(--font-mono); }
+.readout b { display: block; font-weight: 500; font-size: var(--step-1); font-variant-numeric: tabular-nums; }
+.readout span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.stream { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 0.74rem; background: var(--code-bg); border-radius: 4px; padding: 0.5rem 0.6rem; overflow-x: auto; white-space: nowrap; color: var(--ink); }
+.stream-note { grid-column: 1 / -1; font-size: 0.75rem; color: var(--muted); }
+
+/* Sections */
+section.block { padding-block: 3rem; border-top: 1px solid var(--line); }
+.block .head { display: grid; gap: 0.6rem; max-width: 44rem; margin-bottom: 1.8rem; }
+.block .head p { color: var(--muted); }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.split > * { min-width: 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; }
+.shot { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); }
+figure { margin: 0; }
+figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 0.5rem; }
+
+.sensors { display: grid; gap: 1rem; }
+.sensor { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: 0.9rem; align-items: start; }
+.tag { font-family: var(--font-mono); font-weight: 500; font-size: 0.8rem; text-align: center; border: 2px solid var(--ink); border-radius: 4px; padding: 0.15rem 0; }
+.sensor h3 { font-size: var(--step-0); font-family: var(--font-body); font-weight: 600; }
+.sensor p { color: var(--muted); font-size: 0.95rem; }
+
+ul.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+ul.ticks li { padding-left: 1.4rem; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 2px solid var(--gold-fill); }
+
+pre { margin: 0; background: var(--code-bg); border-radius: 6px; padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.5; }
+
+.gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
+
+ol.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.1rem; counter-reset: step; }
+ol.steps li { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 0.8rem; counter-increment: step; }
+ol.steps li::before { content: counter(step); font-family: var(--font-display); font-weight: 700; display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--mask); color: var(--mask-ink); }
+ol.steps h3 { font-size: var(--step-0); font-family: var(--font-body); }
+ol.steps p { color: var(--muted); font-size: 0.95rem; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.note { font-size: var(--step--1); color: var(--muted); margin-top: 0.8rem; }
+
+.box { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+
+details { border-bottom: 1px solid var(--line); padding-block: 0.8rem; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin-top: 0.5rem; color: var(--muted); max-width: 46rem; }
+
+.docs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.docs a { display: grid; gap: 0.3rem; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); text-decoration: none; }
+.docs a:hover { border-color: var(--gold-fill); }
+.docs b { font-family: var(--font-display); font-weight: 600; }
+.docs span { font-size: var(--step--1); color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; font-size: var(--step--1); color: var(--muted); }
+footer .wrap { display: grid; gap: 0.8rem; }
+.selectable { user-select: all; font-family: var(--font-mono); color: var(--ink); }
+
+@media (max-width: 860px) {
+  .hero .wrap, .split, .box { grid-template-columns: minmax(0, 1fr); }
+  .gallery { grid-template-columns: minmax(0, 1fr); }
+  .docs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav { display: none; }
+}
+@media (max-width: 480px) {
+  .live { grid-template-columns: minmax(0, 1fr); }
+  .docs { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board3d { transition: none; }
+}
+/* Base reset for a standalone page. */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../"><span class="pad" aria-hidden="true"></span>INS10</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#board"><span class="en">Board</span><span class="uk">Плата</span></a>
+      <a href="#firmware"><span class="en">Firmware</span><span class="uk">Прошивка</span></a>
+      <a href="#studio">INS10 Studio</a>
+      <a href="#calibration"><span class="en">Calibration</span><span class="uk">Калібрування</span></a>
+      <a href="#specs"><span class="en">Specs</span><span class="uk">Характеристики</span></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language / Мова">
+      <button type="button" id="lang-en" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" id="lang-uk" data-set-lang="uk" aria-pressed="false">УКР</button>
+    </div>
+    <a class="btn small" href="{{SHOP_URL}}"><span class="en">Buy</span><span class="uk">Купити</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow"><span class="en">10-DoF orientation sensor · Raspberry Pi Pico</span><span class="uk">Датчик орієнтації 10-DoF · Raspberry Pi Pico</span></p>
+        <h1><span class="en">Know which way is up and which way is north</span><span class="uk">Знайте, де верх і де північ</span></h1>
+        <p class="lede">
+          <span class="en">A 22.5 × 13.2 mm board with a 6-axis IMU, a magnetometer and a barometer, clocked at exactly 512 Hz. Solder 8 wires to a Pico, drop the free firmware on it, and calibrate step by step in INS10 Studio.</span>
+          <span class="uk">Плата 22,5 × 13,2 мм з 6-осьовим IMU, магнітометром і барометром, тактована рівно на 512 Гц. Припаяйте 8 дротів до Pico, скопіюйте на нього безкоштовну прошивку і покроково відкалібруйте в INS10 Studio.</span>
+        </p>
+        <div class="cta">
+          <a class="btn" href="{{SHOP_URL}}"><span class="en">Buy the module</span><span class="uk">Купити модуль</span></a>
+          <a class="btn ghost" href="https://github.com/vdoom/boards/tree/main/ins10-a3"><span class="en">Read the guide</span><span class="uk">Читати посібник</span></a>
+        </div>
+        <ul class="chips">
+          <li>ICM-42688-P</li><li>MMC5983MA</li><li>LPS22DF</li><li>32.768 kHz</li><li>SPI · 3.3 V</li>
+        </ul>
+      </div>
+      <div>
+        <figure>
+          <img src="img/module.webp" width="1200" height="816" alt="INS10-A3 module, 3D render: three sensor chips, an oscillator and a row of eight gold pads">
+          <figcaption><span class="en">3D render of the board</span><span class="uk">3D-рендер плати</span></figcaption>
+        </figure>
+        <div class="live" aria-label="Example orientation stream">
+          <div class="stage" aria-hidden="true">
+            <div class="tilt">
+              <div class="board3d" id="board3d">
+                <span class="chip" style="left:0.9rem; top:1.3rem; width:1rem; height:1rem"></span>
+                <span class="chip" style="left:3.1rem; top:1.3rem; width:1rem; height:0.85rem"></span>
+                <span class="chip" style="left:5.5rem; top:1.1rem; width:0.65rem; height:0.65rem"></span>
+                <span class="axis x"></span><span class="axis y"></span>
+                <span class="pads"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="readout">
+            <div><span><span class="en">Roll</span><span class="uk">Крен</span></span><b id="ro-roll">0.0°</b></div>
+            <div><span><span class="en">Pitch</span><span class="uk">Тангаж</span></span><b id="ro-pitch">0.0°</b></div>
+            <div><span><span class="en">Heading</span><span class="uk">Курс</span></span><b id="ro-head">0.0°</b></div>
+          </div>
+          <div class="stream" id="stream">$ATT,81234,0.999990,0.001200,-0.003100,0.002900,0.14,-0.36,0.33,89.67,0.2104,-0.1532,0.0871,0.03,0.21,31.42,00D</div>
+          <p class="stream-note"><span class="en">Example of the firmware's <code>$ATT</code> line, generated in your browser.</span><span class="uk">Приклад рядка <code>$ATT</code> прошивки, згенерований у вашому браузері.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="board">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">The board</span><span class="uk">Плата</span></p>
+        <h2><span class="en">Three sensors and a clock on one SPI bus</span><span class="uk">Три сенсори й генератор на одній шині SPI</span></h2>
+        <p><span class="en">The IMU runs from an external 32.768 kHz oscillator instead of its internal RC clock, so its 512 Hz sample rate holds to ±25 ppm. Gyro integration and timestamps stay predictable.</span><span class="uk">IMU працює від зовнішнього генератора 32,768 кГц, а не від власного RC-генератора, тож його частота 512 Гц тримається в межах ±25 ppm. Інтегрування гіроскопа й мітки часу лишаються передбачуваними.</span></p>
+      </div>
+      <div class="split">
+        <figure>
+          <img class="shot" src="img/pinout.png" width="1816" height="1078" alt="INS10-A3 pinout: J1 pins 1 to 8 are 3V3, GND, MMC_CS, ICM_CS, LPS_CS, SCLK, MOSI, MISO; three INT pads on the opposite edge; X axis to the right, Y away from J1, Z up">
+          <figcaption><span class="en">Pinout and body axes. X points from the magnetometer to the barometer, Y away from J1, Z out of the component side.</span><span class="uk">Розпіновка й осі. X — від магнітометра до барометра, Y — від J1, Z — із боку компонентів.</span></figcaption>
+        </figure>
+        <div class="sensors">
+          <div class="sensor">
+            <span class="tag">IMU</span>
+            <div>
+              <h3>TDK InvenSense ICM-42688-P</h3>
+              <p><span class="en">Gyroscope ±2000 °/s with 2.8 mdps/√Hz noise, accelerometer ±16 g with 70 µg/√Hz, 20-bit FIFO data.</span><span class="uk">Гіроскоп ±2000 °/с із шумом 2,8 м°/с/√Гц, акселерометр ±16 g із 70 мкg/√Гц, 20-бітні дані FIFO.</span></p>
+            </div>
+          </div>
+          <div class="sensor">
+            <span class="tag">MAG</span>
+            <div>
+              <h3>MEMSIC MMC5983MA</h3>
+              <p><span class="en">Magnetometer ±8 G, 18-bit, 0.4 mG RMS noise. Built-in SET/RESET removes the bridge offset about once a second.</span><span class="uk">Магнітометр ±8 Гс, 18 біт, шум 0,4 мГс СКВ. Вбудований SET/RESET приблизно раз на секунду прибирає зсув моста.</span></p>
+            </div>
+          </div>
+          <div class="sensor">
+            <span class="tag">BARO</span>
+            <div>
+              <h3>ST LPS22DF</h3>
+              <p><span class="en">Barometer 260–1260 hPa, ±0.5 hPa absolute accuracy, 0.34 Pa RMS noise.</span><span class="uk">Барометр 260–1260 гПа, абсолютна точність ±0,5 гПа, шум 0,34 Па СКВ.</span></p>
+            </div>
+          </div>
+          <div class="sensor">
+            <span class="tag">CLK</span>
+            <div>
+              <h3>ECS-327MVATX 32.768 kHz</h3>
+              <p><span class="en">CMOS oscillator into the IMU's CLKIN pin: the 500 Hz setting becomes exactly 512 Hz.</span><span class="uk">Генератор CMOS на вхід CLKIN IMU: налаштування 500 Гц стає рівно 512 Гц.</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="firmware">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Firmware · free, open source</span><span class="uk">Прошивка · безкоштовна, відкритий код</span></p>
+        <h2><span class="en">A Kalman filter that runs on the Pico</span><span class="uk">Фільтр Калмана, що працює на Pico</span></h2>
+        <p><span class="en">Copy one UF2 file onto a Pico or Pico 2. The firmware reads all three sensors and sends orientation over USB as plain text lines.</span><span class="uk">Скопіюйте один файл UF2 на Pico або Pico 2. Прошивка читає всі три сенсори й передає орієнтацію через USB звичайними текстовими рядками.</span></p>
+      </div>
+      <div class="split">
+        <ul class="ticks">
+          <li><span class="en">Extended Kalman filter on a quaternion at 512 Hz: works in every orientation, no gimbal lock.</span><span class="uk">Розширений фільтр Калмана на кватерніоні, 512 Гц: працює в будь-якому положенні, без «складання рамки».</span></li>
+          <li><span class="en">Adaptive rejection of linear acceleration, vibration and magnetic disturbances. The magnetometer corrects heading only, never tilt.</span><span class="uk">Адаптивне відкидання прискорень, вібрації й магнітних завад. Магнітометр виправляє лише курс, ніколи — нахил.</span></li>
+          <li><span class="en">Gyro bias tracked in real time, with a self-learned model of its temperature dependence.</span><span class="uk">Зсув гіроскопа відстежується в реальному часі, а його залежність від температури прошивка вивчає сама.</span></li>
+          <li><span class="en">Quaternion, roll, pitch, yaw, compass heading, 1σ uncertainties and status flags up to 200 Hz, plus raw sensor streams.</span><span class="uk">Кватерніон, крен, тангаж, рискання, компасний курс, невизначеності 1σ і прапорці стану до 200 Гц, а також сирі потоки сенсорів.</span></li>
+          <li><span class="en">Calibration stored in flash. The fusion library is portable C11 for your own microcontroller.</span><span class="uk">Калібрування зберігається у flash. Бібліотека злиття даних — переносний C11 для вашого мікроконтролера.</span></li>
+        </ul>
+        <div>
+          <pre><code>import serial
+
+with serial.Serial("COM5", 115200, timeout=1) as port:
+    port.write(b"stream att 50\n")
+    while True:
+        f = port.readline().decode().strip().split(",")
+        if f[0] == "$ATT":
+            roll, pitch, yaw, heading = map(float, f[6:10])
+            print(roll, pitch, heading)</code></pre>
+          <p class="note"><span class="en">Reading orientation from Python. Any language with a serial port works.</span><span class="uk">Читання орієнтації з Python. Підійде будь-яка мова з доступом до послідовного порту.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="studio">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Desktop app · free, open source</span><span class="uk">Настільний додаток · безкоштовний, відкритий код</span></p>
+        <h2>INS10 Studio</h2>
+        <p><span class="en">See the board move in 3D, plot every signal, check the wiring automatically and calibrate with guided wizards. English and Ukrainian interface, switchable while it runs. A built-in simulator lets you try it before the module arrives.</span><span class="uk">Дивіться, як плата рухається в 3D, будуйте графіки будь-яких сигналів, перевіряйте проводку автоматично й калібруйте з майстрами. Інтерфейс українською й англійською, мова перемикається на ходу. Вбудований імітатор дозволяє спробувати все ще до отримання модуля.</span></p>
+      </div>
+      <div class="gallery">
+        <figure>
+          <img class="shot en" src="img/studio-en-overview.png" width="1440" height="770" alt="INS10 Studio Overview page with the board in 3D, angle tiles and filter flags" loading="lazy">
+          <img class="shot uk" src="img/studio-uk-overview.png" width="1440" height="770" alt="INS10 Studio, сторінка «Огляд» з платою в 3D, кутами й прапорцями фільтра" loading="lazy">
+          <figcaption><span class="en">Overview: attitude, heading, uncertainty, gyro bias, temperature.</span><span class="uk">Огляд: положення, курс, невизначеність, зсув гіроскопа, температура.</span></figcaption>
+        </figure>
+        <figure>
+          <img class="shot en" src="img/studio-en-magwizard.png" width="1440" height="770" alt="Magnetometer calibration wizard with a point cloud on a sphere and the result report" loading="lazy">
+          <img class="shot uk" src="img/studio-uk-magwizard.png" width="1440" height="770" alt="Майстер калібрування магнітометра з хмарою точок на сфері й звітом" loading="lazy">
+          <figcaption><span class="en">Magnetometer wizard: hard and soft iron, alignment to the IMU, coverage of 72 sphere cells.</span><span class="uk">Майстер магнітометра: hard і soft iron, вирівнювання до IMU, охоплення 72 клітинок сфери.</span></figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="img/studio-en-plots.png" width="1440" height="770" alt="Plots page with roll, pitch, yaw, heading, gyro bias, temperature and raw accelerometer traces" loading="lazy">
+          <figcaption><span class="en">Plots with pause, scroll-back and CSV export.</span><span class="uk">Графіки з паузою, прокручуванням назад і експортом у CSV.</span></figcaption>
+        </figure>
+      </div>
+      <p class="note"><span class="en">Screenshots show the built-in simulator. Windows 10/11; Linux and macOS build from source but are not tested yet.</span><span class="uk">На знімках — вбудований імітатор. Windows 10/11; на Linux і macOS збирається із сирців, але ще не перевірялося.</span></p>
+    </div>
+  </section>
+
+  <section class="block" id="calibration">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Calibration</span><span class="uk">Калібрування</span></p>
+        <h2><span class="en">25 numbered faces, three wizards</span><span class="uk">25 пронумерованих граней, три майстри</span></h2>
+        <p><span class="en">Print the 26-face jig, tape the module and its Pico inside, and put it down on face 1, 2, 3 and so on. About 100 g of PLA, no supports.</span><span class="uk">Надрукуйте двадцятишестигранну підставку, закріпіть у ній модуль разом із Pico і кладіть на грань 1, 2, 3 і далі. Близько 100 г PLA, без підтримок.</span></p>
+      </div>
+      <div class="split">
+        <figure>
+          <img class="shot" src="img/jig.png" width="1000" height="693" alt="3D-printable calibration jig: a rhombicuboctahedron with engraved face numbers, and its open base with the module and Pico" loading="lazy">
+          <figcaption><span class="en">Calibration jig, STL and STEP included.</span><span class="uk">Підставка для калібрування, STL і STEP у комплекті.</span></figcaption>
+        </figure>
+        <div>
+          <ol class="steps">
+            <li><div><h3><span class="en">Accelerometer and gyro</span><span class="uk">Акселерометр і гіроскоп</span></h3><p><span class="en">12–25 resting faces, 3–4 s each. Bias, scale and cross-axis terms for both sensors.</span><span class="uk">12–25 граней, по 3–4 с на кожній. Зсув, масштаб і перехресні зв'язки обох сенсорів.</span></p></div></li>
+            <li><div><h3><span class="en">Magnetometer</span><span class="uk">Магнітометр</span></h3><p><span class="en">60–90 s of slow turning in your hand. Hard and soft iron, and the alignment to the IMU axes.</span><span class="uk">60–90 с повільного обертання в руці. Hard і soft iron та вирівнювання до осей IMU.</span></p></div></li>
+            <li><div><h3><span class="en">Temperature (optional)</span><span class="uk">Температура (за бажанням)</span></h3><p><span class="en">Cool the board in a fridge, let it warm up on the desk. Gyro and accelerometer bias versus temperature.</span><span class="uk">Охолодіть плату в холодильнику, дайте прогрітися на столі. Зсув гіроскопа й акселерометра залежно від температури.</span></p></div></li>
+          </ol>
+          <div class="table-wrap" style="margin-top:1.6rem">
+            <table>
+              <thead><tr><th><span class="en">Measured on one module</span><span class="uk">Виміряно на одному модулі</span></th><th><span class="en">Before</span><span class="uk">До</span></th><th><span class="en">After</span><span class="uk">Після</span></th></tr></thead>
+              <tbody>
+                <tr><td><span class="en">Accelerometer |a| error, 23 positions</span><span class="uk">Похибка |a| акселерометра, 23 положення</span></td><td class="num">3.09 mg</td><td class="num">0.07 mg</td></tr>
+                <tr><td><span class="en">Gyro bias drift, −12…+25 °C</span><span class="uk">Дрейф зсуву гіроскопа, −12…+25 °C</span></td><td class="num">0.24 °/s</td><td class="num">0.007 °/s</td></tr>
+                <tr><td><span class="en">Accelerometer bias drift, same range</span><span class="uk">Дрейф зсуву акселерометра, той самий діапазон</span></td><td class="num">8.7 mg</td><td class="num">0.12 mg</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="wiring">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Wiring</span><span class="uk">Підключення</span></p>
+        <h2><span class="en">Eight wires to a Raspberry Pi Pico</span><span class="uk">Вісім дротів до Raspberry Pi Pico</span></h2>
+        <p><span class="en">Power from the Pico's 3V3(OUT), SPI0 on GP16–GP19, three chip selects. The interrupt pads are optional.</span><span class="uk">Живлення від 3V3(OUT) Pico, SPI0 на GP16–GP19, три виводи вибору. Площадки переривань — за бажанням.</span></p>
+      </div>
+      <img class="shot" src="img/wiring.svg" width="960" height="720" alt="Wiring table and Pico pin map: J1.1 to pin 36, J1.2 to pin 23, J1.3 to pin 14, J1.4 to pin 22, J1.5 to pin 15, J1.6 to pin 24, J1.7 to pin 25, J1.8 to pin 21" loading="lazy" style="width:100%; max-width:60rem">
+    </div>
+  </section>
+
+  <section class="block" id="specs">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Specifications</span><span class="uk">Характеристики</span></p>
+        <h2>INS10-A3</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><th scope="row"><span class="en">Size</span><span class="uk">Розмір</span></th><td>22.5 × 13.2 × 1.6 mm, <span class="en">2.54 mm pitch holes, no mounting holes</span><span class="uk">отвори з кроком 2,54 мм, без кріпильних отворів</span></td></tr>
+            <tr><th scope="row"><span class="en">Supply</span><span class="uk">Живлення</span></th><td>3.3 V, <span class="en">max 3.6 V; logic 3.3 V, not 5 V tolerant</span><span class="uk">не більше 3,6 В; логіка 3,3 В, 5 В не витримує</span></td></tr>
+            <tr><th scope="row"><span class="en">Interface</span><span class="uk">Інтерфейс</span></th><td><span class="en">SPI, 3 chip selects, 3 interrupt outputs</span><span class="uk">SPI, 3 виводи вибору, 3 виходи переривань</span></td></tr>
+            <tr><th scope="row"><span class="en">Gyroscope</span><span class="uk">Гіроскоп</span></th><td>±2000 °/s, 20-bit, 2.8 mdps/√Hz</td></tr>
+            <tr><th scope="row"><span class="en">Accelerometer</span><span class="uk">Акселерометр</span></th><td>±16 g, 20-bit, 70 µg/√Hz</td></tr>
+            <tr><th scope="row"><span class="en">Magnetometer</span><span class="uk">Магнітометр</span></th><td>±8 G, 18-bit, 0.4 mG RMS</td></tr>
+            <tr><th scope="row"><span class="en">Barometer</span><span class="uk">Барометр</span></th><td>260–1260 hPa, ±0.5 hPa</td></tr>
+            <tr><th scope="row"><span class="en">IMU rate</span><span class="uk">Частота IMU</span></th><td>512 Hz <span class="en">from a ±25 ppm 32.768 kHz oscillator</span><span class="uk">від генератора 32,768 кГц ±25 ppm</span></td></tr>
+            <tr><th scope="row"><span class="en">Firmware output</span><span class="uk">Вихід прошивки</span></th><td><span class="en">USB serial, orientation up to 200 Hz, raw IMU up to 512 Hz, magnetometer 50 Hz, barometer 25 Hz</span><span class="uk">USB-послідовний порт, орієнтація до 200 Гц, сирі дані IMU до 512 Гц, магнітометр 50 Гц, барометр 25 Гц</span></td></tr>
+            <tr><th scope="row"><span class="en">Operating temperature</span><span class="uk">Робоча температура</span></th><td>−40…+85 °C <span class="en">(sensor rating)</span><span class="uk">(межа сенсорів)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="box">
+    <div class="wrap box">
+      <div>
+        <h2><span class="en">In the package</span><span class="uk">У комплекті</span></h2>
+        <ul class="ticks" style="margin-top:1rem">
+          <li><span class="en">INS10-A3 module, assembled and tested (no header soldered)</span><span class="uk">Модуль INS10-A3, зібраний і перевірений (без впаяної гребінки)</span></li>
+          <li><span class="en">Download: firmware for Pico and Pico 2, with source</span><span class="uk">Завантаження: прошивка для Pico і Pico 2, із сирцями</span></li>
+          <li><span class="en">Download: INS10 Studio for Windows, with source</span><span class="uk">Завантаження: INS10 Studio для Windows, із сирцями</span></li>
+          <li><span class="en">Download: calibration jig, STL and STEP</span><span class="uk">Завантаження: підставка для калібрування, STL і STEP</span></li>
+          <li><span class="en">Documentation in English and Ukrainian</span><span class="uk">Документація українською й англійською</span></li>
+        </ul>
+      </div>
+      <div>
+        <h2><span class="en">You will need</span><span class="uk">Знадобиться</span></h2>
+        <ul class="ticks" style="margin-top:1rem">
+          <li><span class="en">Raspberry Pi Pico or Pico 2</span><span class="uk">Raspberry Pi Pico або Pico 2</span></li>
+          <li><span class="en">8 short wires and a soldering iron</span><span class="uk">8 коротких дротів і паяльник</span></li>
+          <li><span class="en">A Windows 10/11 PC for INS10 Studio</span><span class="uk">ПК з Windows 10/11 для INS10 Studio</span></li>
+          <li><span class="en">Optional: a 3D printer, 4 × M3×16 screws, thin double-sided tape</span><span class="uk">За бажанням: 3D-принтер, 4 гвинти M3×16, тонкий двосторонній скотч</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="docs">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Documentation</span><span class="uk">Документація</span></p>
+        <h2><span class="en">Everything is in the open</span><span class="uk">Усе у відкритому доступі</span></h2>
+      </div>
+      <div class="docs">
+        <a href="https://github.com/vdoom/boards/blob/main/ins10-a3/docs/en/user-guide.md" class="en"><b>User guide</b><span>Wiring, flashing, Studio, calibration, troubleshooting</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/ins10-a3/docs/uk/user-guide.md" class="uk"><b>Посібник</b><span>Підключення, прошивка, Studio, калібрування, несправності</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/ins10-a3/docs/en/datasheet.md" class="en"><b>Datasheet</b><span>Specifications, pinout, dimensions, axes</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/ins10-a3/docs/uk/datasheet.md" class="uk"><b>Технічний опис</b><span>Характеристики, розпіновка, розміри, осі</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/ins10-a3/docs/en/protocol.md" class="en"><b>USB protocol</b><span>Commands, $ATT, $RAW, $MAG, $BARO</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/ins10-a3/firmware/docs/PROTOCOL.md" class="uk"><b>Протокол USB</b><span>Команди, $ATT, $RAW, $MAG, $BARO</span></a>
+        <a href="https://github.com/vdoom/boards/releases?q=ins10-a3"><b><span class="en">Downloads</span><span class="uk">Завантаження</span></b><span><span class="en">UF2 files, INS10 Studio, STL</span><span class="uk">Файли UF2, INS10 Studio, STL</span></span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <div class="head">
+        <h2><span class="en">Questions</span><span class="uk">Питання</span></h2>
+      </div>
+      <details>
+        <summary><span class="en">Does it work with Arduino or ESP32?</span><span class="uk">Чи працює з Arduino або ESP32?</span></summary>
+        <p><span class="en">The module works with any 3.3 V microcontroller that has SPI. The ready-made firmware is for Raspberry Pi Pico and Pico 2. Elsewhere you can reuse the fusion library (portable C11) and write the SPI part yourself; the datasheet lists the register settings. A 5 V Arduino Uno needs level shifters.</span><span class="uk">Модуль працює з будь-яким мікроконтролером на 3,3 В із SPI. Готова прошивка — для Raspberry Pi Pico і Pico 2. На інших платах можна використати бібліотеку злиття даних (C11) і написати частину SPI самостійно; налаштування регістрів є в технічному описі. Для Arduino Uno на 5 В потрібні перетворювачі рівнів.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Do I need the 3D-printed jig?</span><span class="uk">Чи обов'язкова надрукована підставка?</span></summary>
+        <p><span class="en">No. It makes the accelerometer and gyro calibration quick and repeatable. Without it, rest the module against a small box in 12 or more different orientations.</span><span class="uk">Ні. З нею калібрування акселерометра й гіроскопа швидке й повторюване. Без неї спирайте модуль на невелику коробку в 12 і більше різних положеннях.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Does it give position or speed?</span><span class="uk">Чи визначає він координати або швидкість?</span></summary>
+        <p><span class="en">No. It gives orientation: tilt and heading. Position needs GNSS or another reference. Like any AHRS without GNSS, it eventually takes an acceleration held for more than about 30 s for tilt.</span><span class="uk">Ні. Він визначає орієнтацію: нахил і курс. Для координат потрібен GNSS або інше джерело. Як і будь-яка система орієнтації без GNSS, він зрештою сприймає прискорення, що триває понад 30 с, як нахил.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">How accurate is the heading?</span><span class="uk">Яка точність курсу?</span></summary>
+        <p><span class="en">In the firmware's simulation with realistic calibration residuals, heading error is 0.7° RMS. In practice the magnetic environment dominates: keep the module away from steel, motors and power cables, and calibrate it as mounted.</span><span class="uk">У симуляції прошивки з реалістичними залишками калібрування похибка курсу — 0,7° СКВ. На практиці все визначає магнітне оточення: тримайте модуль подалі від сталі, двигунів і силових кабелів і калібруйте його змонтованим.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Is it safe for my project?</span><span class="uk">Чи безпечний він для мого проєкту?</span></summary>
+        <p><span class="en">INS10-A3 is a development module for makers and engineers. It is not certified for aviation, medical, automotive or other safety-critical use. Use 3.3 V only; it is sensitive to static electricity and contains small parts.</span><span class="uk">INS10-A3 — модуль для розробників і мейкерів. Він не сертифікований для авіації, медицини, автомобілів чи інших відповідальних застосувань. Лише 3,3 В; чутливий до статичної електрики, містить дрібні деталі.</span></p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><a href="../"><span class="en">All products</span><span class="uk">Усі продукти</span></a></p>
+    <p><span class="en">Manufacturer:</span><span class="uk">Виробник:</span> {{SELLER_NAME}}, {{SELLER_ADDRESS}}</p>
+    <p><span class="en">Questions:</span><span class="uk">Питання:</span> <span class="selectable">{{SUPPORT_EMAIL}}</span></p>
+    <p><span class="en">Firmware and INS10 Studio are MIT-licensed open source. ICM-42688-P, MMC5983MA and LPS22DF are products of TDK InvenSense, MEMSIC and STMicroelectronics.</span><span class="uk">Прошивка й INS10 Studio — відкритий код за ліцензією MIT. ICM-42688-P, MMC5983MA і LPS22DF — вироби TDK InvenSense, MEMSIC і STMicroelectronics.</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function setLang(lang) {
+    root.setAttribute("data-lang", lang);
+    root.setAttribute("lang", lang);
+    document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-set-lang") === lang));
+    });
+    try { localStorage.setItem("site-lang", lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("site-lang"); } catch (e) {}
+  var nav = (navigator.language || "").toLowerCase();
+  setLang(saved || (nav.indexOf("uk") === 0 ? "uk" : "en"));
+  document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-set-lang")); });
+  });
+
+  // Example $ATT stream: a slow synthetic motion, printed in the firmware's format.
+  var board = document.getElementById("board3d");
+  var stream = document.getElementById("stream");
+  var roRoll = document.getElementById("ro-roll");
+  var roPitch = document.getElementById("ro-pitch");
+  var roHead = document.getElementById("ro-head");
+  var d2r = Math.PI / 180;
+  var t0 = 81234;
+  function frame(t) {
+    var s = t / 1000;
+    var roll = 18 * Math.sin(s * 0.7);
+    var pitch = 12 * Math.sin(s * 0.45 + 1.1);
+    var yaw = 40 * Math.sin(s * 0.18);           // ENU yaw, counter-clockwise from east
+    var heading = ((90 - yaw) % 360 + 360) % 360;  // compass heading, clockwise from north
+    var cr = Math.cos(roll * d2r / 2), sr = Math.sin(roll * d2r / 2);
+    var cp = Math.cos(pitch * d2r / 2), sp = Math.sin(pitch * d2r / 2);
+    var cy = Math.cos(yaw * d2r / 2), sy = Math.sin(yaw * d2r / 2);
+    var qw = cr * cp * cy + sr * sp * sy;
+    var qx = sr * cp * cy - cr * sp * sy;
+    var qy = cr * sp * cy + sr * cp * sy;
+    var qz = cr * cp * sy - sr * sp * cy;
+    var temp = 31.4 + 0.05 * Math.sin(s * 0.05);
+    var f6 = function (v) { return v.toFixed(6); };
+    var f2 = function (v) { return v.toFixed(2); };
+    stream.textContent = "$ATT," + Math.round(t0 + t) + "," + [f6(qw), f6(qx), f6(qy), f6(qz), f2(roll), f2(pitch), f2(yaw), f2(heading),
+      "0.2104", "-0.1532", "0.0871", "0.03", "0.21", f2(temp), "009"].join(",");
+    roRoll.textContent = roll.toFixed(1) + "°";
+    roPitch.textContent = pitch.toFixed(1) + "°";
+    roHead.textContent = heading.toFixed(1) + "°";
+    board.style.transform = "rotateZ(" + (-yaw).toFixed(2) + "deg) rotateX(" + (-pitch).toFixed(2) + "deg) rotateY(" + roll.toFixed(2) + "deg)";
+  }
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { frame(4200); return; }
+  var last = 0;
+  function loop(now) {
+    if (now - last > 100) { frame(now); last = now; }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

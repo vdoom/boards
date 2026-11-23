@@ -1,0 +1,46 @@
+# Qt Test executables, one per area, run by CTest on the "offscreen" platform.
+configure_file(fixture_dir.h.in ${CMAKE_CURRENT_BINARY_DIR}/fixture_dir.h @ONLY)
+
+set(INS10_QT_BIN "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
+
+function(ins10_add_test name)
+    cmake_parse_arguments(T "" "" "SOURCES;LIBS" ${ARGN})
+    qt_add_executable(${name} ${name}.cpp ${T_SOURCES})
+    target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(${name} PRIVATE ins10core ins10device Qt6::Test ${T_LIBS})
+    ins10_set_warnings(${name})
+    add_test(NAME ${name} COMMAND ${name})
+    # On Windows Qt Test writes to the debugger unless it is told to use the console.
+    set_tests_properties(${name} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1")
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22)
+        set_property(TEST ${name} PROPERTY ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${INS10_QT_BIN}")
+    endif()
+endfunction()
+
+ins10_add_test(tst_attitude)
+ins10_add_test(tst_protocol)
+ins10_add_test(tst_status)
+ins10_add_test(tst_recording)
+ins10_add_test(tst_calfields)
+ins10_add_test(tst_session)
+ins10_add_test(tst_health)
+ins10_add_test(tst_overview)
+ins10_add_test(tst_calib)
+ins10_add_test(tst_wizards)
+set_tests_properties(tst_wizards PROPERTIES TIMEOUT 600)
+ins10_add_test(tst_plots LIBS ins10ui)
+ins10_add_test(tst_ui LIBS ins10ui)
+set_tests_properties(tst_ui PROPERTIES TIMEOUT 900)
+
+if(INS10_HAVE_REPLAY)
+    # The firmware's own replay utility, built from its unchanged source, as the
+    # reference for tst_replay.
+    add_executable(ins10_replay_reference ${INS10_FIRMWARE_DIR}/tests/replay.c)
+    target_link_libraries(ins10_replay_reference PRIVATE ins10)
+    if(MSVC)
+        target_compile_definitions(ins10_replay_reference PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+    ins10_add_test(tst_replay LIBS ins10replay)
+    target_compile_definitions(tst_replay PRIVATE INS10_REPLAY_REFERENCE="$<TARGET_FILE:ins10_replay_reference>")
+    add_dependencies(tst_replay ins10_replay_reference)
+endif()
