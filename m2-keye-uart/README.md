@@ -9,6 +9,7 @@ An M.2 2230 Key E card that brings the Jetson's spare UART out to a flight contr
 | | |
 |---|---|
 | Host | Jetson Orin Nano / Orin NX developer kit, carrier board P3768, JetPack 6. The M.2 Key E UART (`uartb`, 1.8 V) becomes `/dev/ttyTHS3` |
+| Tested in | Jetson Orin Nano developer kit with JetPack 6.2, Jetson Xavier NX developer kit with JetPack 5 |
 | Pigtail | 3.3 V UART with flow control: RX, TX, RTS, CTS, GND. Pixhawk TELEM levels; not 5 V tolerant |
 | Speed | 921600 baud on a cable to a flight controller by default; up to about 3 Mbaud with RTS/CTS |
 | Power | From the slot's 3.3 V, under 20 mA. Red PWR LED |
@@ -39,7 +40,7 @@ Top view, card edge down. Pad J2.1 is the square one, on the right, next to the 
 
 The pads are numbered like the TELEM pins, so a straight cable works. Take a JST-GH 6-pin cable, cut off one connector, cut back and insulate the wire of pin 1 (+5 V), and solder wires 2–6 to pads J2.2–J2.6. Go by the pin numbers on the connector, not by wire colours: they differ between cables.
 
-The pads are through-holes at 1.5 mm pitch with 0.7 mm drills. Solder the wires from the component side and lead them out past the screw end of the card. Check that the card with the wires fits under the Jetson module before you close everything up.
+The pads are through-holes at 1.5 mm pitch with 0.7 mm drills. Solder the wires from the component side and lead them out past the screw end of the card. With the wires soldered, the card fits under the Jetson module without touching anything. For an extra margin, put a strip of insulating tape between the card and the module.
 
 RTS and CTS are optional. Without them, the card holds CTS at "clear to send", so hardware flow control on the Jetson never blocks.
 
@@ -50,54 +51,20 @@ RTS and CTS are optional. Without them, the card holds CTS at "clear to send", s
 
 ## Jetson setup
 
-NVIDIA's default device tree disables the M.2 Key E UART. The overlay [`jetson/m2-keye-uartb-overlay.dts`](jetson/m2-keye-uartb-overlay.dts) enables it with the high-speed UART driver and adds the alias `serial3`, so the port appears as `/dev/ttyTHS3`.
+**Step-by-step guide for the Jetson Orin Nano with JetPack 6.2: [docs/en/jetson-setup.md](docs/en/jetson-setup.md).** It covers inserting the card, building the overlay, the boot entry, checks, a loopback test, a fallback for when the overlay does not apply, and how to undo everything.
 
-1. With the Jetson powered off, insert the card into the M.2 Key E slot and fix it with the slot screw. Power on: the red PWR LED on the card lights up.
-2. Build the overlay and copy it to `/boot`:
-
-   ```bash
-   sudo apt install device-tree-compiler
-   dtc -@ -I dts -O dtb -o m2-keye-uartb.dtbo m2-keye-uartb-overlay.dts
-   sudo cp m2-keye-uartb.dtbo /boot/
-   ```
-
-3. In `/boot/extlinux/extlinux.conf`, inside the `LABEL` section you boot, add the line below. If jetson-io has already written an `OVERLAYS` line, add the file to it, separated by a space.
-
-   ```
-         OVERLAYS /boot/m2-keye-uartb.dtbo
-   ```
-
-4. Reboot and check:
-
-   ```bash
-   cat /proc/device-tree/bus@0/serial@3110000/status   # okay
-   ls -l /dev/ttyTHS3
-   dmesg | grep -i 3110000
-   ```
-
-If the status is still `disabled`, merge the overlay into the DTB and point `FDT` at the result:
+In short: NVIDIA's default device tree disables the M.2 Key E UART. The overlay [`jetson/m2-keye-uartb-overlay.dts`](jetson/m2-keye-uartb-overlay.dts) enables it with the high-speed UART driver, and the port appears as `/dev/ttyTHS3`:
 
 ```bash
-fdtoverlay -i /boot/dtb/<your-kernel>.dtb -o /boot/dtb/<your-kernel>-m2uart.dtb m2-keye-uartb.dtbo
-# extlinux.conf:  FDT /boot/dtb/<your-kernel>-m2uart.dtb
+sudo apt install device-tree-compiler
+dtc -@ -I dts -O dtb -o m2-keye-uartb.dtbo m2-keye-uartb-overlay.dts
+sudo cp m2-keye-uartb.dtbo /boot/
+# /boot/extlinux/extlinux.conf, at the end of the LABEL section you boot:
+#     OVERLAYS /boot/m2-keye-uartb.dtbo
+sudo reboot
 ```
 
-Fused and secure-boot units reject unsigned overlays and DTBs. On those, the change has to go into the signed DTB of the image you flash.
-
-**JetPack 6.2.2 (r36.5)** has a DMA problem on the Orin high-speed UART: corrupted received data and SMMU faults in `dmesg`. NVIDIA's fix for `serial@3100000` is an `iommus = <&smmu_niso0 TEGRA234_SID_GPCDMA>;` entry on the UART node, or running the UART without DMA. Nobody has confirmed it for `serial@3110000`, which uses the same DMA controller. If you see garbage on RX under this release, apply the same fix to this node; the comment in the overlay file explains how.
-
-## Loopback test
-
-On the pigtail, connect TX to RX, and RTS to CTS if those wires are fitted. Then:
-
-```bash
-stty -F /dev/ttyTHS3 115200 raw -echo -crtscts      # crtscts if RTS-CTS is looped too
-cat /dev/ttyTHS3 &
-echo hello > /dev/ttyTHS3                            # "hello" must come back
-kill %1
-```
-
-This checks the whole chain: Jetson → card → wire → card → Jetson. Repeat at 921600 or higher if you plan to run fast.
+The card also works in the Jetson Xavier NX developer kit with JetPack 5, which has its own device tree; the overlay and the guide are not written for it.
 
 ## Flight controller
 
@@ -144,5 +111,6 @@ M.2 contacts used: 22 to the Jetson's RX, 32 from the Jetson's TX, 34 to the Jet
 | Path | What |
 |---|---|
 | `README.md`, `README.uk.md` | This guide |
+| `docs/en/jetson-setup.md`, `docs/uk/jetson-setup.md` | Jetson Orin Nano with JetPack 6.2: step-by-step setup |
 | `jetson/m2-keye-uartb-overlay.dts` | Device-tree overlay: M.2 Key E UART → `/dev/ttyTHS3` |
 | `images/` | Renders of the card and the pad diagram |

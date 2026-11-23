@@ -240,6 +240,7 @@ body { margin: 0; }
         <div>
           <h3><span class="en">On the card</span><span class="uk">На карті</span></h3>
           <ul class="ticks" style="margin-top:1rem">
+            <li><span class="en">Tested in a Jetson Orin Nano developer kit with JetPack 6.2 and a Jetson Xavier NX developer kit with JetPack 5.</span><span class="uk">Перевірено в платі розробника Jetson Orin Nano з JetPack 6.2 і в платі розробника Jetson Xavier NX з JetPack 5.</span></li>
             <li><span class="en">Two SN74LVC2T45 level translators, one per direction, so nothing on the card has to guess which way a signal goes.</span><span class="uk">Два перетворювачі рівнів SN74LVC2T45, по одному на напрямок, тож нічому на карті не доводиться вгадувати, куди йде сигнал.</span></li>
             <li><span class="en">Its own 1.8 V regulator for the Jetson side: the M.2 Key E slot supplies only 3.3 V.</span><span class="uk">Власний стабілізатор 1,8 В для боку Jetson: слот M.2 Key E дає лише 3,3 В.</span></li>
             <li><span class="en">TPD4E05U06 ESD protection, 0.5 pF, on all four signals that leave the card.</span><span class="uk">Захист від ESD TPD4E05U06, 0,5 пФ, на всіх чотирьох сигналах, що виходять з карти.</span></li>
@@ -277,7 +278,7 @@ body { margin: 0; }
           </tbody>
         </table>
       </div>
-      <p class="note"><span class="en">The pads are through-holes at 1.5 mm pitch. Solder from the component side, lead the wires out past the screw end, and check that the card fits under the Jetson module with them. RTS and CTS are optional below 921600 baud.</span><span class="uk">Площадки — металізовані отвори з кроком 1,5 мм. Паяйте з боку компонентів, виводьте дроти за край з боку гвинта й перевірте, що карта з ними вміщається під модулем Jetson. До 921600 бод RTS і CTS не обов'язкові.</span></p>
+      <p class="note"><span class="en">The pads are through-holes at 1.5 mm pitch. Solder from the component side and lead the wires out past the screw end: with them, the card fits under the Jetson module without touching anything. A strip of insulating tape between the card and the module adds a margin. RTS and CTS are optional below 921600 baud.</span><span class="uk">Площадки — металізовані отвори з кроком 1,5 мм. Паяйте з боку компонентів і виводьте дроти за край з боку гвинта: з ними карта вміщається під модулем Jetson і ні в що не впирається. Смужка ізоляційної стрічки між картою й модулем додасть запасу. До 921600 бод RTS і CTS не обов'язкові.</span></p>
     </div>
   </section>
 
@@ -306,7 +307,7 @@ sudo reboot
 stty -F /dev/ttyTHS3 115200 raw -echo -crtscts
 cat /dev/ttyTHS3 &
 echo hello &gt; /dev/ttyTHS3      # hello comes back</code></pre>
-          <p class="note"><span class="en">The documentation has the full steps, a fallback for when the overlay does not apply, ArduPilot and PX4 parameters, and a note on JetPack 6.2.2.</span><span class="uk">У документації — повні кроки, запасний спосіб, якщо оверлей не застосовується, параметри ArduPilot і PX4 та примітка щодо JetPack 6.2.2.</span></p>
+          <p class="note"><span class="en">The <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/docs/en/jetson-setup.md">step-by-step guide for Orin Nano with JetPack 6.2</a> has every step, the checks, a fallback for when the overlay does not apply, and how to undo it all.</span><span class="uk"><a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/docs/uk/jetson-setup.md">Покрокова інструкція для Orin Nano з JetPack 6.2</a> містить усі кроки, перевірки, запасний спосіб, якщо оверлей не застосовується, і як усе скасувати.</span></p>
         </div>
       </div>
     </div>
@@ -322,6 +323,7 @@ echo hello &gt; /dev/ttyTHS3      # hello comes back</code></pre>
         <table>
           <tbody>
             <tr><th scope="row"><span class="en">Host</span><span class="uk">Хост</span></th><td><span class="en">Jetson Orin Nano / Orin NX developer kit, carrier board P3768, JetPack 6. M.2 Key E UART (<code>uartb</code>, 1.8 V) → <code>/dev/ttyTHS3</code></span><span class="uk">Плата розробника Jetson Orin Nano / Orin NX, несуча плата P3768, JetPack 6. UART слота M.2 Key E (<code>uartb</code>, 1,8 В) → <code>/dev/ttyTHS3</code></span></td></tr>
+            <tr><th scope="row"><span class="en">Tested in</span><span class="uk">Перевірено</span></th><td><span class="en">Jetson Orin Nano developer kit, JetPack 6.2; Jetson Xavier NX developer kit, JetPack 5</span><span class="uk">Плата розробника Jetson Orin Nano, JetPack 6.2; плата розробника Jetson Xavier NX, JetPack 5</span></td></tr>
             <tr><th scope="row"><span class="en">Format</span><span class="uk">Формат</span></th><td><span class="en">M.2 2230 Key E, 22 × 30 mm, 0.8 mm board, lead-free HASL; parts on the top side only, up to 1.2 mm high; fixed by the slot screw</span><span class="uk">M.2 2230 Key E, 22 × 30 мм, плата 0,8 мм, безсвинцеве лудіння HASL; компоненти лише згори, висотою до 1,2 мм; кріплення гвинтом слота</span></td></tr>
             <tr><th scope="row"><span class="en">Pigtail</span><span class="uk">Хвіст</span></th><td><span class="en">6 through-hole pads, 1.5 mm pitch, 0.7 mm drill: VCC (unused), RX, TX, RTS, CTS, GND, numbered like Pixhawk TELEM pins 1–6</span><span class="uk">6 металізованих отворів, крок 1,5 мм, діаметр 0,7 мм: VCC (не використовується), RX, TX, RTS, CTS, GND, пронумеровані як контакти 1–6 TELEM Pixhawk</span></td></tr>
             <tr><th scope="row"><span class="en">Levels</span><span class="uk">Рівні</span></th><td><span class="en">3.3 V on the pigtail, 1.8 V to the Jetson; not 5 V tolerant</span><span class="uk">3,3 В на хвості, 1,8 В до Jetson; 5 В не витримує</span></td></tr>
@@ -340,7 +342,7 @@ echo hello &gt; /dev/ttyTHS3      # hello comes back</code></pre>
       <div>
         <h2><span class="en">In the package</span><span class="uk">У комплекті</span></h2>
         <ul class="ticks" style="margin-top:1rem">
-          <li><span class="en">M2-KeyE-UART v1.0 card, assembled</span><span class="uk">Карта M2-KeyE-UART v1.0, зібрана</span></li>
+          <li><span class="en">The M2-KeyE-UART v1.0 card, assembled; no cable or wires</span><span class="uk">Карта M2-KeyE-UART v1.0, зібрана; без кабелю й дротів</span></li>
           <li><span class="en">Documentation in English and Ukrainian, with the device-tree overlay</span><span class="uk">Документація українською й англійською, з оверлеєм дерева пристроїв</span></li>
         </ul>
       </div>
@@ -362,8 +364,10 @@ echo hello &gt; /dev/ttyTHS3      # hello comes back</code></pre>
         <h2><span class="en">Everything is in the open</span><span class="uk">Усе у відкритому доступі</span></h2>
       </div>
       <div class="docs">
-        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/README.md" class="en"><b>Documentation</b><span>Pads and wiring, jumpers, Jetson setup, loopback test, flight-controller parameters, dimensions</span></a>
-        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/README.uk.md" class="uk"><b>Документація</b><span>Площадки й підключення, перемички, налаштування Jetson, перевірка петлею, параметри контролера, розміри</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/README.md" class="en"><b>Documentation</b><span>Pads and wiring, jumpers, flight-controller parameters, circuit, dimensions</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/docs/en/jetson-setup.md" class="en"><b>Jetson setup guide</b><span>Orin Nano with JetPack 6.2: overlay, boot entry, checks, loopback test, undo</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/README.uk.md" class="uk"><b>Документація</b><span>Площадки й підключення, перемички, параметри контролера, схема, розміри</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/docs/uk/jetson-setup.md" class="uk"><b>Налаштування Jetson</b><span>Orin Nano з JetPack 6.2: оверлей, запис завантаження, перевірки, петля, скасування</span></a>
         <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/jetson/m2-keye-uartb-overlay.dts"><b><span class="en">Device-tree overlay</span><span class="uk">Оверлей дерева пристроїв</span></b><span><span class="en">Enables the M.2 Key E UART as <code>/dev/ttyTHS3</code></span><span class="uk">Вмикає UART слота M.2 Key E як <code>/dev/ttyTHS3</code></span></span></a>
         <a href="../"><b><span class="en">Other boards</span><span class="uk">Інші плати</span></b><span><span class="en">Orientation sensors and IMU breakouts with open firmware and documentation</span><span class="uk">Датчики орієнтації й плати IMU з відкритими прошивками та документацією</span></span></a>
       </div>
@@ -377,7 +381,7 @@ echo hello &gt; /dev/ttyTHS3      # hello comes back</code></pre>
       </div>
       <details>
         <summary><span class="en">Will it work in other boards?</span><span class="uk">Чи працюватиме вона в інших платах?</span></summary>
-        <p><span class="en">It is made for the Jetson Orin Nano / Orin NX developer kit, carrier P3768, whose M.2 Key E slot carries a 1.8 V UART. Another board needs a UART on the same M.2 contacts at 1.8 V; check its documentation first. Never use the card in a slot whose UART runs at 3.3 V.</span><span class="uk">Вона зроблена для плати розробника Jetson Orin Nano / Orin NX, несуча P3768, де слот M.2 Key E має UART на 1,8 В. Інша плата має виводити UART на ті самі контакти M.2 і на 1,8 В; спершу перевірте її документацію. Ніколи не вставляйте карту в слот, де UART працює на 3,3 В.</span></p>
+        <p><span class="en">It is made for the Jetson Orin Nano / Orin NX developer kit, carrier P3768, whose M.2 Key E slot carries a 1.8 V UART, and tested in an Orin Nano with JetPack 6.2. It also works in the Jetson Xavier NX developer kit with JetPack 5; the device-tree overlay in the documentation is for Orin. Another board needs a UART on the same M.2 contacts at 1.8 V; check its documentation first. Never use the card in a slot whose UART runs at 3.3 V.</span><span class="uk">Вона зроблена для плати розробника Jetson Orin Nano / Orin NX, несуча P3768, де слот M.2 Key E має UART на 1,8 В, і перевірена в Orin Nano з JetPack 6.2. Працює вона й у платі розробника Jetson Xavier NX з JetPack 5; оверлей дерева пристроїв у документації — для Orin. Інша плата має виводити UART на ті самі контакти M.2 і на 1,8 В; спершу перевірте її документацію. Ніколи не вставляйте карту в слот, де UART працює на 3,3 В.</span></p>
       </details>
       <details>
         <summary><span class="en">Do I lose Wi-Fi?</span><span class="uk">Чи зникне Wi-Fi?</span></summary>

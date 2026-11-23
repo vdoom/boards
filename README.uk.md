@@ -10,7 +10,7 @@
 |---|---|---|
 | <img src="ins10-a3/images/module-iso.png" width="200" alt="INS10-A3"><br>[**INS10-A3**](ins10-a3/README.uk.md) | Датчик орієнтації 10-DoF для Raspberry Pi Pico (ICM-42688-P, MMC5983MA, LPS22DF). Прошивка з фільтром Калмана, додаток калібрування INS10 Studio для Windows і підставка під 3D-друк | [Посібник](ins10-a3/docs/uk/user-guide.md) · [Технічний опис](ins10-a3/docs/uk/datasheet.md) |
 | <img src="i42688-a/images/module-iso.png" width="200" alt="I42688-A"><br>[**I42688-A**](i42688-a/README.uk.md) | Плата 6-осьового IMU 10,5 × 10,5 мм (ICM-42688-P). Стає в макетну плату, SPI або I²C, 1,8–3,3 В | [Розпіновка, підключення, перше читання](i42688-a/README.uk.md) |
-| <img src="m2-keye-uart/images/module-iso.png" width="200" alt="M2-KeyE-UART"><br>[**M2-KeyE-UART v1.0**](m2-keye-uart/README.uk.md) | Карта M.2 2230 Key E для плати розробника Jetson Orin Nano / Orin NX: UART слота 1,8 В на площадках 3,3 В, пронумерованих як порт TELEM Pixhawk (RX, TX, RTS, CTS, GND). Оверлей дерева пристроїв додається | [Площадки, налаштування Jetson, польотний контролер](m2-keye-uart/README.uk.md) |
+| <img src="m2-keye-uart/images/module-iso.png" width="200" alt="M2-KeyE-UART"><br>[**M2-KeyE-UART v1.0**](m2-keye-uart/README.uk.md) | Карта M.2 2230 Key E для плати розробника Jetson Orin Nano / Orin NX: UART слота 1,8 В на площадках 3,3 В, пронумерованих як порт TELEM Pixhawk (RX, TX, RTS, CTS, GND). Оверлей дерева пристроїв додається | [Площадки й підключення](m2-keye-uart/README.uk.md) · [Налаштування Jetson, JetPack 6.2](m2-keye-uart/docs/uk/jetson-setup.md) |
 
 ## Завантаження
 
