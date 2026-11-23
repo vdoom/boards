@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>M2-KeyE-UART Card</title>
+<meta name="description" content="M2-KeyE-UART v1.0: M.2 2230 Key E card that brings the Jetson Orin Nano / Orin NX developer kit UART out at 3.3 V on pads numbered like a Pixhawk TELEM port. Open documentation and device-tree overlay.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Same printed-circuit datasheet look as the other product pages (../ins10-a3/,
+   ../i42688-a/): faintly green paper, soldermask green and gold as accents, and a red
+   warning colour for the two v1.0 jumpers that must stay as shipped. */
+:root {
+  --paper: #f4f7f3;
+  --panel: #ffffff;
+  --ink: #15211b;
+  --muted: #566359;
+  --line: #d3ddd5;
+  --mask: #1d5a39;
+  --mask-ink: #ffffff;
+  --gold: #8a6416;
+  --gold-fill: #e2b84a;
+  --code-bg: #e9efe9;
+  --warn: #b3261e;
+  --warn-bg: #fbeceb;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.86rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.6rem;
+  --step-3: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
+  --wrap: 72rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #101814; --panel: #16211b; --ink: #e4ece6; --muted: #9aaba0; --line: #283730;
+    --mask: #e2b84a; --mask-ink: #1a1405; --gold: #e8c262; --gold-fill: #e2b84a; --code-bg: #1b2822;
+    --warn: #ff8a80; --warn-bg: #2a1716;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #101814; --panel: #16211b; --ink: #e4ece6; --muted: #9aaba0; --line: #283730;
+  --mask: #e2b84a; --mask-ink: #1a1405; --gold: #e8c262; --gold-fill: #e2b84a; --code-bg: #1b2822;
+  --warn: #ff8a80; --warn-bg: #2a1716;
+  color-scheme: dark;
+}
+:root[data-lang="uk"] .en { display: none !important; }
+:root:not([data-lang="uk"]) .uk { display: none !important; }
+
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.6; }
+a { color: var(--gold); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--gold-fill); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--step-2); font-weight: 600; }
+h3 { font-size: var(--step-1); font-weight: 600; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+img { max-width: 100%; height: auto; display: block; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Header */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 1rem; padding-block: 0.6rem; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.04em; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+.brand .pad { width: 0.9rem; height: 0.9rem; border-radius: 50%; border: 0.22rem solid var(--gold-fill); background: var(--paper); }
+.nav { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-left: auto; font-size: var(--step--1); }
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--ink); }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.lang button { font: 500 var(--step--1) var(--font-mono); padding: 0.25rem 0.6rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-display); font-weight: 600; letter-spacing: 0.02em;
+  padding: 0.7rem 1.2rem; border-radius: 6px; text-decoration: none;
+  background: var(--mask); color: var(--mask-ink); border: 1px solid var(--mask);
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.small { padding: 0.4rem 0.8rem; font-size: var(--step--1); }
+
+/* Hero */
+.hero { padding-block: 3rem 2rem; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
+.hero h1 { font-size: var(--step-3); font-weight: 700; margin-top: 0.6rem; }
+.hero .lede { margin-top: 1rem; font-size: var(--step-1); color: var(--muted); max-width: 36rem; }
+.hero .cta { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.6rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.6rem; padding: 0; list-style: none; }
+.chips li { font-family: var(--font-mono); font-size: var(--step--1); border: 1px solid var(--line); border-radius: 4px; padding: 0.15rem 0.5rem; color: var(--muted); }
+.hero figure { margin: 0; }
+.hero figure img { max-width: 34rem; margin-inline: auto; width: 100%; }
+.hero figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 0.4rem; text-align: right; }
+
+/* Key figures under the hero */
+.hero .wrap.figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-top: 2.2rem; align-items: start; }
+.figures div { border-top: 3px solid var(--gold-fill); padding-top: 0.6rem; min-width: 0; }
+.figures b { display: block; font-family: var(--font-mono); font-weight: 500; font-size: var(--step-1); font-variant-numeric: tabular-nums; }
+.figures span { font-size: var(--step--1); color: var(--muted); }
+
+/* Sections */
+section.block { padding-block: 3rem; border-top: 1px solid var(--line); }
+.block .head { display: grid; gap: 0.6rem; max-width: 44rem; margin-bottom: 1.8rem; }
+.block .head p { color: var(--muted); }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.split > * { min-width: 0; }
+.shot { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #ffffff; }
+figure { margin: 0; }
+figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 0.5rem; }
+.warn { border-left: 4px solid var(--warn); background: var(--warn-bg); border-radius: 0 6px 6px 0; padding: 1rem 1.2rem; display: grid; gap: 0.6rem; margin-top: 1.6rem; }
+.warn h3 { color: var(--warn); }
+.warn p { max-width: 46rem; }
+ol.steps { padding-left: 1.4rem; margin: 0; display: grid; gap: 0.7rem; }
+ol.steps li::marker { font-family: var(--font-mono); color: var(--gold); }
+
+ul.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+ul.ticks li { padding-left: 1.4rem; position: relative; }
+ul.ticks li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 2px solid var(--gold-fill); }
+
+pre { margin: 0; background: var(--code-bg); border-radius: 6px; padding: 0.9rem 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.pin { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+.note { font-size: var(--step--1); color: var(--muted); margin-top: 0.8rem; }
+
+.box { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
+
+details { border-bottom: 1px solid var(--line); padding-block: 0.8rem; }
+summary { cursor: pointer; font-weight: 600; }
+details p { margin-top: 0.5rem; color: var(--muted); max-width: 46rem; }
+
+.docs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.docs a { display: grid; gap: 0.3rem; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); text-decoration: none; }
+.docs a:hover { border-color: var(--gold-fill); }
+.docs b { font-family: var(--font-display); font-weight: 600; }
+.docs span { font-size: var(--step--1); color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding-block: 2rem 3rem; font-size: var(--step--1); color: var(--muted); }
+footer .wrap { display: grid; gap: 0.8rem; }
+.selectable { user-select: all; font-family: var(--font-mono); color: var(--ink); }
+
+@media (max-width: 860px) {
+  .hero .wrap, .split, .box { grid-template-columns: minmax(0, 1fr); }
+  .hero .wrap.figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .docs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav { display: none; }
+}
+@media (max-width: 480px) {
+  .docs { grid-template-columns: minmax(0, 1fr); }
+}
+/* Base reset for a standalone page. */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../"><span class="pad" aria-hidden="true"></span>M2-KeyE-UART</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#card"><span class="en">Card</span><span class="uk">Карта</span></a>
+      <a href="#wiring"><span class="en">Wiring</span><span class="uk">Підключення</span></a>
+      <a href="#jetson">Jetson</a>
+      <a href="#specs"><span class="en">Specs</span><span class="uk">Характеристики</span></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language / Мова">
+      <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-set-lang="uk" aria-pressed="false">УКР</button>
+    </div>
+    <a class="btn small" href="{{SHOP_URL}}"><span class="en">Buy</span><span class="uk">Купити</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow"><span class="en">M.2 Key E → UART 3.3 V · Jetson Orin</span><span class="uk">M.2 Key E → UART 3,3 В · Jetson Orin</span></p>
+        <h1><span class="en">The Jetson's spare UART, wired straight to your flight controller</span><span class="uk">Вільний UART Jetson — просто до польотного контролера</span></h1>
+        <p class="lede">
+          <span class="en">An M.2 2230 card for the Key E slot of the Jetson Orin Nano / Orin NX developer kit. It turns the slot's 1.8 V UART into 3.3 V with RTS/CTS and ends in pads numbered like a Pixhawk TELEM port, pin for pin. No USB adapter dangling off the Jetson.</span>
+          <span class="uk">Карта M.2 2230 для слота Key E плати розробника Jetson Orin Nano / Orin NX. Вона перетворює UART слота з 1,8 В на 3,3 В з RTS/CTS і закінчується площадками, пронумерованими як порт TELEM Pixhawk, контакт у контакт. Жодного USB-адаптера, що бовтається на Jetson.</span>
+        </p>
+        <div class="cta">
+          <a class="btn" href="{{SHOP_URL}}"><span class="en">Buy the card</span><span class="uk">Купити карту</span></a>
+          <a class="btn ghost" href="https://github.com/vdoom/boards/tree/main/m2-keye-uart"><span class="en">Documentation</span><span class="uk">Документація</span></a>
+        </div>
+        <ul class="chips">
+          <li>M.2 2230 Key E</li><li>UART · RTS/CTS</li><li>1.8 → 3.3 V</li><li>Jetson P3768</li>
+        </ul>
+      </div>
+      <figure>
+        <img src="img/module.webp" width="1200" height="1056" alt="M2-KeyE-UART v1.0 card, 3D render: an M.2 2230 Key E card with two level-translator chips, a regulator, a red power LED and a row of six solder pads labelled GND, CTS, RTS, TX, RX next to the screw notch">
+        <figcaption><span class="en">3D render of the v1.0 card</span><span class="uk">3D-рендер карти v1.0</span></figcaption>
+      </figure>
+    </div>
+    <div class="wrap figures">
+      <div><b>1.8 → 3.3 V</b><span><span class="en">the slot's UART, translated both ways</span><span class="uk">UART слота з перетворенням в обидва боки</span></span></div>
+      <div><b>921600 baud</b><span><span class="en">by default; about 3 Mbaud with RTS/CTS</span><span class="uk">за замовчуванням; близько 3 Мбод з RTS/CTS</span></span></div>
+      <div><b>TELEM 2–6</b><span><span class="en">pads in Pixhawk pin order</span><span class="uk">площадки в порядку контактів Pixhawk</span></span></div>
+      <div><b>&lt; 20 mA</b><span><span class="en">from the slot's 3.3 V</span><span class="uk">від 3,3 В слота</span></span></div>
+    </div>
+  </section>
+
+  <section class="block" id="card">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">The card</span><span class="uk">Карта</span></p>
+        <h2><span class="en">A native UART where the Wi-Fi card used to be</span><span class="uk">Справжній UART на місці карти Wi-Fi</span></h2>
+        <p><span class="en">The developer kit routes a UART to its M.2 Key E slot at 1.8 V and disables it by default. This card takes the slot, shifts the levels to 3.3 V and brings TX, RX, RTS, CTS and GND out to six solder pads at the screw end.</span><span class="uk">Плата розробника виводить UART на слот M.2 Key E на рівні 1,8 В і за замовчуванням його вимикає. Ця карта займає слот, перетворює рівні на 3,3 В і виводить TX, RX, RTS, CTS і GND на шість площадок біля гвинта.</span></p>
+      </div>
+      <div class="split">
+        <figure>
+          <img class="shot" src="img/pinout.png" width="1300" height="1450" alt="M2-KeyE-UART v1.0, top view: pigtail pads J2.6 to J2.1 are GND, CTS, RTS, TX, RX and VCC, going to Pixhawk TELEM pins 6 to 1; pad J2.1, TELEM pin 1, is crossed out. Pointers mark the PWR LED, jumpers JP2 and JP1 and the M.2 Key E contacts">
+          <figcaption><span class="en">Top view. Each pad goes to the TELEM pin with the same number; arrows up are out of the Jetson, down into it. Pad J2.1 stays unconnected: TELEM pin 1 carries +5 V from the flight controller.</span><span class="uk">Вигляд згори. Кожна площадка йде на контакт TELEM з тим самим номером; стрілки вгору — з Jetson, униз — у Jetson. Площадка J2.1 лишається непідключеною: на контакті 1 TELEM +5 В від польотного контролера.</span></figcaption>
+        </figure>
+        <div>
+          <h3><span class="en">On the card</span><span class="uk">На карті</span></h3>
+          <ul class="ticks" style="margin-top:1rem">
+            <li><span class="en">Two SN74LVC2T45 level translators, one per direction, so nothing on the card has to guess which way a signal goes.</span><span class="uk">Два перетворювачі рівнів SN74LVC2T45, по одному на напрямок, тож нічому на карті не доводиться вгадувати, куди йде сигнал.</span></li>
+            <li><span class="en">Its own 1.8 V regulator for the Jetson side: the M.2 Key E slot supplies only 3.3 V.</span><span class="uk">Власний стабілізатор 1,8 В для боку Jetson: слот M.2 Key E дає лише 3,3 В.</span></li>
+            <li><span class="en">TPD4E05U06 ESD protection, 0.5 pF, on all four signals that leave the card.</span><span class="uk">Захист від ESD TPD4E05U06, 0,5 пФ, на всіх чотирьох сигналах, що виходять з карти.</span></li>
+            <li><span class="en">Pull resistors keep every line at a defined level with the UART disabled or the cable unplugged. Without RTS/CTS wires, CTS reads "clear to send", so flow control never blocks.</span><span class="uk">Резистори тримають кожну лінію на визначеному рівні, коли UART вимкнено або кабель від'єднано. Без дротів RTS/CTS лінія CTS означає «можна передавати», тож керування потоком ніколи не блокує.</span></li>
+            <li><span class="en">With the Jetson off, the pads go high-impedance: a powered flight controller sees open lines.</span><span class="uk">Коли Jetson вимкнено, площадки переходять у високоімпедансний стан: увімкнений польотний контролер бачить розімкнені лінії.</span></li>
+            <li><span class="en">Parts on the top side only, up to 1.2 mm high, and a red PWR LED that lights when the slot has power.</span><span class="uk">Компоненти лише згори, висотою до 1,2 мм, і червоний світлодіод PWR, що світиться, коли на слоті є живлення.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn" role="note">
+        <h3><span class="en">v1.0: leave JP1 and JP2 as shipped</span><span class="uk">v1.0: не змінюйте JP1 і JP2</span></h3>
+        <p><span class="en"><b>JP1</b> (3V3 / VIO / 1V8, next to the regulator) is set to 1V8 by a copper link under the solder mask, so it looks open. Do not solder anything on it: a bridge between its top and middle pads would put 3.3 V on the Jetson's 1.8 V UART pins.</span><span class="uk"><b>JP1</b> (3V3 / VIO / 1V8, біля стабілізатора) встановлено на 1V8 мідною перемичкою під паяльною маскою, тому вона виглядає розімкненою. Нічого на ній не паяйте: перемичка між верхньою та середньою площадками подасть 3,3 В на виводи UART Jetson, розраховані на 1,8 В.</span></p>
+        <p><span class="en"><b>JP2</b> (VCC) is open and must stay open. Bridged, it would let the flight controller's +5 V from TELEM pin 1 onto the Jetson's 3.3 V rail.</span><span class="uk"><b>JP2</b> (VCC) розімкнена й має такою лишатися. Якщо її замкнути, +5 В польотного контролера з контакту 1 TELEM потрапить на шину 3,3 В Jetson.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="wiring">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Wiring</span><span class="uk">Підключення</span></p>
+        <h2><span class="en">Five wires to a TELEM port</span><span class="uk">П'ять дротів до порту TELEM</span></h2>
+        <p><span class="en">Cut one connector off a JST-GH 6-pin cable, cut back and insulate the pin 1 wire, and solder wires 2–6 to pads J2.2–J2.6. Go by the pin numbers on the connector, not by wire colours.</span><span class="uk">Відріжте один роз'єм 6-контактного кабелю JST-GH, обріжте й заізолюйте провід контакту 1, а дроти 2–6 припаяйте до площадок J2.2–J2.6. Орієнтуйтеся на номери контактів на роз'ємі, а не на кольори дротів.</span></p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th><span class="en">Pad</span><span class="uk">Площадка</span></th><th><span class="en">Name</span><span class="uk">Назва</span></th><th><span class="en">Direction</span><span class="uk">Напрямок</span></th><th><span class="en">Pixhawk TELEM pin</span><span class="uk">Контакт TELEM Pixhawk</span></th></tr></thead>
+          <tbody>
+            <tr><td class="num">J2.1</td><td class="pin">VCC</td><td>—</td><td><span class="en">1, +5 V from the flight controller: <b>leave unconnected</b></span><span class="uk">1, +5 В від польотного контролера: <b>не підключати</b></span></td></tr>
+            <tr><td class="num">J2.2</td><td class="pin">RX</td><td><span class="en">into the Jetson</span><span class="uk">у Jetson</span></td><td><span class="en">2, FC TX</span><span class="uk">2, TX контролера</span></td></tr>
+            <tr><td class="num">J2.3</td><td class="pin">TX</td><td><span class="en">out of the Jetson</span><span class="uk">з Jetson</span></td><td><span class="en">3, FC RX</span><span class="uk">3, RX контролера</span></td></tr>
+            <tr><td class="num">J2.4</td><td class="pin">RTS</td><td><span class="en">out of the Jetson</span><span class="uk">з Jetson</span></td><td><span class="en">4, FC CTS</span><span class="uk">4, CTS контролера</span></td></tr>
+            <tr><td class="num">J2.5</td><td class="pin">CTS</td><td><span class="en">into the Jetson</span><span class="uk">у Jetson</span></td><td><span class="en">5, FC RTS</span><span class="uk">5, RTS контролера</span></td></tr>
+            <tr><td class="num">J2.6</td><td class="pin">GND</td><td>—</td><td>6, GND</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><span class="en">The pads are through-holes at 1.5 mm pitch. Solder from the component side, lead the wires out past the screw end, and check that the card fits under the Jetson module with them. RTS and CTS are optional below 921600 baud.</span><span class="uk">Площадки — металізовані отвори з кроком 1,5 мм. Паяйте з боку компонентів, виводьте дроти за край з боку гвинта й перевірте, що карта з ними вміщається під модулем Jetson. До 921600 бод RTS і CTS не обов'язкові.</span></p>
+    </div>
+  </section>
+
+  <section class="block" id="jetson">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Getting started</span><span class="uk">Початок роботи</span></p>
+        <h2><span class="en">From the slot to <code>/dev/ttyTHS3</code></span><span class="uk">Від слота до <code>/dev/ttyTHS3</code></span></h2>
+        <p><span class="en">NVIDIA's device tree leaves this UART disabled. A small overlay, included in the documentation, turns it on as a high-speed UART.</span><span class="uk">У дереві пристроїв NVIDIA цей UART вимкнено. Невеликий оверлей із документації вмикає його як швидкий UART.</span></p>
+      </div>
+      <div class="split">
+        <ol class="steps">
+          <li><span class="en">Power the Jetson off, take out the Wi-Fi card, insert this one and fix it with the slot screw. At power-on the red PWR LED lights up.</span><span class="uk">Вимкніть Jetson, вийміть карту Wi-Fi, вставте цю й закріпіть гвинтом слота. Після ввімкнення засвітиться червоний світлодіод PWR.</span></li>
+          <li><span class="en">Build the overlay with <code>dtc</code>, copy it to <code>/boot</code> and add it to <code>extlinux.conf</code>.</span><span class="uk">Зберіть оверлей за допомогою <code>dtc</code>, скопіюйте в <code>/boot</code> і додайте в <code>extlinux.conf</code>.</span></li>
+          <li><span class="en">Reboot: the port is <code>/dev/ttyTHS3</code>.</span><span class="uk">Перезавантажте: порт — <code>/dev/ttyTHS3</code>.</span></li>
+          <li><span class="en">Loop TX to RX on the pads and send a line: it must come back.</span><span class="uk">З'єднайте TX з RX на площадках і надішліть рядок: він має повернутися.</span></li>
+          <li><span class="en">Set the flight controller's TELEM port to MAVLink2 at 921600 baud, and on the Jetson run mavlink-router, MAVROS or MAVSDK on <code>/dev/ttyTHS3</code>.</span><span class="uk">На польотному контролері налаштуйте порт TELEM на MAVLink2 і 921600 бод, а на Jetson запустіть mavlink-router, MAVROS або MAVSDK на <code>/dev/ttyTHS3</code>.</span></li>
+        </ol>
+        <div>
+          <pre><code>dtc -@ -I dts -O dtb -o m2-keye-uartb.dtbo m2-keye-uartb-overlay.dts
+sudo cp m2-keye-uartb.dtbo /boot/
+# /boot/extlinux/extlinux.conf, in the LABEL you boot:
+#     OVERLAYS /boot/m2-keye-uartb.dtbo
+sudo reboot
+
+stty -F /dev/ttyTHS3 115200 raw -echo -crtscts
+cat /dev/ttyTHS3 &
+echo hello &gt; /dev/ttyTHS3      # hello comes back</code></pre>
+          <p class="note"><span class="en">The documentation has the full steps, a fallback for when the overlay does not apply, ArduPilot and PX4 parameters, and a note on JetPack 6.2.2.</span><span class="uk">У документації — повні кроки, запасний спосіб, якщо оверлей не застосовується, параметри ArduPilot і PX4 та примітка щодо JetPack 6.2.2.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="specs">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Specifications</span><span class="uk">Характеристики</span></p>
+        <h2>M2-KeyE-UART v1.0</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><th scope="row"><span class="en">Host</span><span class="uk">Хост</span></th><td><span class="en">Jetson Orin Nano / Orin NX developer kit, carrier board P3768, JetPack 6. M.2 Key E UART (<code>uartb</code>, 1.8 V) → <code>/dev/ttyTHS3</code></span><span class="uk">Плата розробника Jetson Orin Nano / Orin NX, несуча плата P3768, JetPack 6. UART слота M.2 Key E (<code>uartb</code>, 1,8 В) → <code>/dev/ttyTHS3</code></span></td></tr>
+            <tr><th scope="row"><span class="en">Format</span><span class="uk">Формат</span></th><td><span class="en">M.2 2230 Key E, 22 × 30 mm, 0.8 mm board, lead-free HASL; parts on the top side only, up to 1.2 mm high; fixed by the slot screw</span><span class="uk">M.2 2230 Key E, 22 × 30 мм, плата 0,8 мм, безсвинцеве лудіння HASL; компоненти лише згори, висотою до 1,2 мм; кріплення гвинтом слота</span></td></tr>
+            <tr><th scope="row"><span class="en">Pigtail</span><span class="uk">Хвіст</span></th><td><span class="en">6 through-hole pads, 1.5 mm pitch, 0.7 mm drill: VCC (unused), RX, TX, RTS, CTS, GND, numbered like Pixhawk TELEM pins 1–6</span><span class="uk">6 металізованих отворів, крок 1,5 мм, діаметр 0,7 мм: VCC (не використовується), RX, TX, RTS, CTS, GND, пронумеровані як контакти 1–6 TELEM Pixhawk</span></td></tr>
+            <tr><th scope="row"><span class="en">Levels</span><span class="uk">Рівні</span></th><td><span class="en">3.3 V on the pigtail, 1.8 V to the Jetson; not 5 V tolerant</span><span class="uk">3,3 В на хвості, 1,8 В до Jetson; 5 В не витримує</span></td></tr>
+            <tr><th scope="row"><span class="en">Speed</span><span class="uk">Швидкість</span></th><td><span class="en">921600 baud by default; the Orin UART reaches 4.25 Mbaud, about 3 Mbaud in practice with RTS/CTS. The card is not the limit</span><span class="uk">921600 бод за замовчуванням; UART Orin працює до 4,25 Мбод, на практиці близько 3 Мбод з RTS/CTS. Карта швидкість не обмежує</span></td></tr>
+            <tr><th scope="row"><span class="en">Protection</span><span class="uk">Захист</span></th><td><span class="en">ESD on all four pigtail signals (TPD4E05U06, 0.5 pF); defined idle levels; high-impedance pads with the Jetson off</span><span class="uk">ESD на всіх чотирьох сигналах хвоста (TPD4E05U06, 0,5 пФ); визначені рівні в спокої; високоімпедансні площадки при вимкненому Jetson</span></td></tr>
+            <tr><th scope="row"><span class="en">Power</span><span class="uk">Живлення</span></th><td><span class="en">From the slot's 3.3 V, under 20 mA; red PWR LED</span><span class="uk">Від 3,3 В слота, менше 20 мА; червоний світлодіод PWR</span></td></tr>
+            <tr><th scope="row"><span class="en">Jumpers</span><span class="uk">Перемички</span></th><td><span class="en">JP1 at 1V8 from the factory, JP2 open. Leave both as shipped</span><span class="uk">JP1 з заводу на 1V8, JP2 розімкнена. Обидві залишайте як є</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="box">
+    <div class="wrap box">
+      <div>
+        <h2><span class="en">In the package</span><span class="uk">У комплекті</span></h2>
+        <ul class="ticks" style="margin-top:1rem">
+          <li><span class="en">M2-KeyE-UART v1.0 card, assembled</span><span class="uk">Карта M2-KeyE-UART v1.0, зібрана</span></li>
+          <li><span class="en">Documentation in English and Ukrainian, with the device-tree overlay</span><span class="uk">Документація українською й англійською, з оверлеєм дерева пристроїв</span></li>
+        </ul>
+      </div>
+      <div>
+        <h2><span class="en">You will need</span><span class="uk">Знадобиться</span></h2>
+        <ul class="ticks" style="margin-top:1rem">
+          <li><span class="en">Jetson Orin Nano or Orin NX developer kit (carrier P3768) with JetPack 6</span><span class="uk">Плата розробника Jetson Orin Nano або Orin NX (несуча P3768) з JetPack 6</span></li>
+          <li><span class="en">A flight controller with a Pixhawk-style TELEM port</span><span class="uk">Польотний контролер із портом TELEM як у Pixhawk</span></li>
+          <li><span class="en">A JST-GH 6-pin cable or five thin wires, and a soldering iron</span><span class="uk">6-контактний кабель JST-GH або п'ять тонких дротів і паяльник</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="docs">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow"><span class="en">Documentation</span><span class="uk">Документація</span></p>
+        <h2><span class="en">Everything is in the open</span><span class="uk">Усе у відкритому доступі</span></h2>
+      </div>
+      <div class="docs">
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/README.md" class="en"><b>Documentation</b><span>Pads and wiring, jumpers, Jetson setup, loopback test, flight-controller parameters, dimensions</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/README.uk.md" class="uk"><b>Документація</b><span>Площадки й підключення, перемички, налаштування Jetson, перевірка петлею, параметри контролера, розміри</span></a>
+        <a href="https://github.com/vdoom/boards/blob/main/m2-keye-uart/jetson/m2-keye-uartb-overlay.dts"><b><span class="en">Device-tree overlay</span><span class="uk">Оверлей дерева пристроїв</span></b><span><span class="en">Enables the M.2 Key E UART as <code>/dev/ttyTHS3</code></span><span class="uk">Вмикає UART слота M.2 Key E як <code>/dev/ttyTHS3</code></span></span></a>
+        <a href="../"><b><span class="en">Other boards</span><span class="uk">Інші плати</span></b><span><span class="en">Orientation sensors and IMU breakouts with open firmware and documentation</span><span class="uk">Датчики орієнтації й плати IMU з відкритими прошивками та документацією</span></span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <div class="head">
+        <h2><span class="en">Questions</span><span class="uk">Питання</span></h2>
+      </div>
+      <details>
+        <summary><span class="en">Will it work in other boards?</span><span class="uk">Чи працюватиме вона в інших платах?</span></summary>
+        <p><span class="en">It is made for the Jetson Orin Nano / Orin NX developer kit, carrier P3768, whose M.2 Key E slot carries a 1.8 V UART. Another board needs a UART on the same M.2 contacts at 1.8 V; check its documentation first. Never use the card in a slot whose UART runs at 3.3 V.</span><span class="uk">Вона зроблена для плати розробника Jetson Orin Nano / Orin NX, несуча P3768, де слот M.2 Key E має UART на 1,8 В. Інша плата має виводити UART на ті самі контакти M.2 і на 1,8 В; спершу перевірте її документацію. Ніколи не вставляйте карту в слот, де UART працює на 3,3 В.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Do I lose Wi-Fi?</span><span class="uk">Чи зникне Wi-Fi?</span></summary>
+        <p><span class="en">Yes, the on-board one: the card takes the slot of the Wi-Fi/Bluetooth card. Ethernet still works, and a USB Wi-Fi adapter can take over.</span><span class="uk">Так, вбудований: карта займає слот карти Wi-Fi/Bluetooth. Ethernet працює, а Wi-Fi може забезпечити USB-адаптер.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Why not a USB-to-UART adapter?</span><span class="uk">Чому не USB-UART адаптер?</span></summary>
+        <p><span class="en">The card uses the Jetson's own UART: nothing hangs off a USB port to shake loose on a drone, the port keeps its name, and RTS/CTS go all the way to the flight controller. The USB ports stay free for cameras.</span><span class="uk">Карта використовує власний UART Jetson: на дроні нема чому випасти з USB-порту, порт не змінює назву, а RTS/CTS доходять до польотного контролера. USB-порти лишаються вільними для камер.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Do I need RTS and CTS?</span><span class="uk">Чи потрібні RTS і CTS?</span></summary>
+        <p><span class="en">Not at 921600 baud and below. Above that, wire them and turn flow control on at both ends. Without the wires the card holds CTS at "clear to send", so the Jetson never stalls.</span><span class="uk">До 921600 бод — ні. Вище підключіть їх і ввімкніть керування потоком з обох боків. Без цих дротів карта тримає CTS у стані «можна передавати», тож Jetson ніколи не зупиняється.</span></p>
+      </details>
+      <details>
+        <summary><span class="en">Is it safe for my project?</span><span class="uk">Чи безпечна вона для мого проєкту?</span></summary>
+        <p><span class="en">M2-KeyE-UART is a development board for makers and engineers. It is not certified for aviation, medical, automotive or other safety-critical use. Insert and remove it only with the Jetson off, never connect +5 V to the pads, and keep in mind that it is sensitive to static electricity.</span><span class="uk">M2-KeyE-UART — плата для розробників і мейкерів. Вона не сертифікована для авіації, медицини, автомобілів чи інших відповідальних застосувань. Вставляйте й виймайте її лише при вимкненому Jetson, ніколи не подавайте +5 В на площадки й пам'ятайте, що вона чутлива до статичної електрики.</span></p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><a href="../"><span class="en">All products</span><span class="uk">Усі продукти</span></a></p>
+    <p><span class="en">Manufacturer:</span><span class="uk">Виробник:</span> {{SELLER_NAME}}, {{SELLER_ADDRESS}}</p>
+    <p><span class="en">Questions:</span><span class="uk">Питання:</span> <span class="selectable">{{SUPPORT_EMAIL}}</span></p>
+    <p><span class="en">NVIDIA, Jetson and Orin are trademarks of NVIDIA Corporation.</span><span class="uk">NVIDIA, Jetson і Orin — торговельні марки NVIDIA Corporation.</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function setLang(lang) {
+    root.setAttribute("data-lang", lang);
+    root.setAttribute("lang", lang);
+    document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-set-lang") === lang));
+    });
+    try { localStorage.setItem("site-lang", lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("site-lang"); } catch (e) {}
+  var nav = (navigator.language || "").toLowerCase();
+  setLang(saved || (nav.indexOf("uk") === 0 ? "uk" : "en"));
+  document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-set-lang")); });
+  });
+})();
+</script>
+</body>
+</html>

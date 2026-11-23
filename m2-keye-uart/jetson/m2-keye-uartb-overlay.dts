@@ -1,0 +1,32 @@
+// M2-KeyE-UART: M.2 Key E -> UART 3.3 V card
+// Enables the M.2 Key E UART of the Jetson Orin Nano/NX devkit (carrier P3768, JetPack 6)
+// as a high-speed UART: uartb @ 0x3110000 -> /dev/ttyTHS3.
+//
+// Build:   dtc -@ -I dts -O dtb -o m2-keye-uartb.dtbo m2-keye-uartb-overlay.dts
+// Install: see README.md, "Jetson setup"
+//
+// JetPack 6.2.2 (r36.5) only, if RX data is corrupted / SMMU faults appear in dmesg:
+// NVIDIA's fix for serial@3100000 is an iommus entry on the UART node. To try it here, build the overlay
+// through the kernel headers (cpp with the tegra234 includes) and add to fragment@0:
+//     iommus = <&smmu_niso0 TEGRA234_SID_GPCDMA>;
+// Not verified for serial@3110000 (same GPCDMA).
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    fragment@0 {
+        target-path = "/bus@0/serial@3110000";
+        __overlay__ {
+            compatible = "nvidia,tegra194-hsuart";
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target-path = "/aliases";
+        __overlay__ {
+            serial3 = "/bus@0/serial@3110000";
+        };
+    };
+};

@@ -10,6 +10,7 @@ Product pages: https://vdoom.github.io/boards/
 |---|---|---|
 | <img src="ins10-a3/images/module-iso.png" width="200" alt="INS10-A3"><br>[**INS10-A3**](ins10-a3/README.md) | 10-DoF orientation sensor for Raspberry Pi Pico (ICM-42688-P, MMC5983MA, LPS22DF). Kalman-filter firmware, the INS10 Studio calibration app for Windows and a printable calibration jig | [User guide](ins10-a3/docs/en/user-guide.md) · [Datasheet](ins10-a3/docs/en/datasheet.md) |
 | <img src="i42688-a/images/module-iso.png" width="200" alt="I42688-A"><br>[**I42688-A**](i42688-a/README.md) | 6-axis IMU breakout, 10.5 × 10.5 mm (ICM-42688-P). Breadboard-friendly, SPI or I²C, 1.8–3.3 V | [Pinout, wiring, first reading](i42688-a/README.md) |
+| <img src="m2-keye-uart/images/module-iso.png" width="200" alt="M2-KeyE-UART"><br>[**M2-KeyE-UART v1.0**](m2-keye-uart/README.md) | M.2 2230 Key E card for the Jetson Orin Nano / Orin NX developer kit: the slot's 1.8 V UART on 3.3 V pads numbered like a Pixhawk TELEM port (RX, TX, RTS, CTS, GND). Device-tree overlay included | [Pads, Jetson setup, flight controller](m2-keye-uart/README.md) |
 
 ## Downloads
 
