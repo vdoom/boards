@@ -9,6 +9,7 @@
 | Продукт | Що це | Документація |
 |---|---|---|
 | <img src="ins10-a3/images/module-iso.png" width="200" alt="INS10-A3"><br>[**INS10-A3**](ins10-a3/README.uk.md) | Датчик орієнтації 10-DoF для Raspberry Pi Pico (ICM-42688-P, MMC5983MA, LPS22DF). Прошивка з фільтром Калмана, додаток калібрування INS10 Studio для Windows і підставка під 3D-друк | [Посібник](ins10-a3/docs/uk/user-guide.md) · [Технічний опис](ins10-a3/docs/uk/datasheet.md) |
+| <img src="i42688-a/images/module-iso.png" width="200" alt="I42688-A"><br>[**I42688-A**](i42688-a/README.uk.md) | Плата 6-осьового IMU 10,5 × 10,5 мм (ICM-42688-P). Стає в макетну плату, SPI або I²C, 1,8–3,3 В | [Розпіновка, підключення, перше читання](i42688-a/README.uk.md) |
 
 ## Завантаження
 
